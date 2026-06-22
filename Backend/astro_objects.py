@@ -137,7 +137,7 @@ class Galaxy(AstroObject):
 
         #squash with ellipiticity
         size = width/3.0
-        r2 = (xr / s) ** 2 + (yr / (s * self.q)) ** 2 #ellipticity equation
+        r2 = (xr / size) ** 2 + (yr / (size * self.q)) ** 2 #ellipticity equation
 
         # surface brightness gaussian -> bright core, faint edges
         # scaled by peak_brightness() so fainter galaxies render dimmer overall
