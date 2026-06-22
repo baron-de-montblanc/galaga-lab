@@ -5,6 +5,49 @@ File for the DASH interaction side
 from astropy.wcs import WCS
 import numpy as np
 import plotly.graph_objects as go
+import yaml
+
+
+def add_object(fig, ra, dec, name, color="#44D9E9", size=8):
+    """
+    Takes in a go.Figure object and an RA/Dec value (in degrees).
+    Adds a dot at the projected Hammer-Aitoff location.
+    Returns the modified figure.
+    """
+    wcs = _make_wcs()
+    px = wcs.all_world2pix([[ra, dec]], 0)[0]
+
+    fig.add_trace(go.Scatter(
+        x=[px[0]],
+        y=[px[1]],
+        mode="markers+text" if name else "markers",
+        marker=dict(color=color, size=size, symbol="circle",
+                    line=dict(color="white", width=0.5)),
+        text=[name],
+        textposition="top center",
+        textfont=dict(color="white", size=10),
+        name=name or f"RA={ra} Dec={dec}",
+        hovertemplate=(
+            f"<b>{name}</b><br>"
+            f"RA: {ra:.4f}°<br>"
+            f"Dec: {dec:.4f}°<extra></extra>"
+        ),
+    ))
+
+    return fig
+
+
+def add_catalog_objects(fig, catalog_path):
+    """
+    Loads in the catalog.yaml file and adds all objects to the graph. Calls add_object()
+    """
+    with open(catalog_path, "r") as f:
+        catalog = yaml.safe_load(f)
+
+    for obj in catalog["objects"]:
+        fig = add_object(fig, ra=obj["ra"], dec=obj["dec"], name=obj["name"])
+
+    return fig
 
 
 def _make_wcs():
@@ -16,7 +59,7 @@ def _make_wcs():
     return wcs
 
 
-def init_graph():
+def init_graph(catalog_path):
     """
     Build and return the empty sky-chart figure using astropy
     """
@@ -104,4 +147,9 @@ def init_graph():
         showlegend=False,
         dragmode="pan",
     )
+
+
+    # Now add catalog objects
+    fig = add_catalog_objects(fig, catalog_path=catalog_path)
+
     return fig

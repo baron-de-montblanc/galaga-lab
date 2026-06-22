@@ -26,7 +26,13 @@ from flask import session, Flask
 
 import Frontend.frontend_utils as frontu
 
-# Initialize the webserver
+
+# =========== Global variables ==============
+
+CATALOG_PATH = "./catalog.yml"
+
+# ====== Initialize the webserver ============
+
 server = Flask(__name__)
 server.secret_key = os.urandom(24)
 
@@ -62,7 +68,7 @@ app.layout = dbc.Container([
     Input("init-interval", "n_intervals"),
 )
 def initialize_graph(n):
-    return frontu.init_graph()
+    return frontu.init_graph(catalog_path=CATALOG_PATH)
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
