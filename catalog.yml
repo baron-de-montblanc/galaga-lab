@@ -1,0 +1,23 @@
+objects:
+ 
+  - name: M87
+    aliases:
+      - Virgo A
+      - NGC 4486
+      - 3C 274
+    type: Elliptical Galaxy
+    ra:  "12:30:49.42338"   # hour angle
+    dec: "12:23:28.0439"   # degrees arcmin arcsec
+    distance_mly: 53.5     # million light-years
+    redshift: 0.00428
+    magnitude:
+      apparent_v: 8.6
+      absolute_v: -22.4
+    size_arcmin: 7.2       # angular diameter
+    constellation: Virgo
+    notes: >
+      Giant elliptical galaxy at the center of the Virgo Cluster.
+      Contains a supermassive black hole of ~6.5 billion solar masses,
+      the first black hole ever directly imaged (Event Horizon Telescope, 2019).
+      Notable for its relativistic jet extending ~5000 light-years.
+ 
