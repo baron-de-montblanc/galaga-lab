@@ -15,7 +15,10 @@ Instead of modeling, just give it an approximated "type" by a dictionary that ca
 2. mass_to_light (solar masses per solar luminosity)
 ordered from red to blue
 
-Old, red stellar populations are dimmer for their mass while young blue populations are bright for their mass
+Wikipedia: elliptical and lenticular galaxies typically appearing redder due to older stellar populations, 
+while spiral and irregular galaxies are often bluer, indicating ongoing star formation
+
+Just kinda picked at random with minor amounts of logic
 '''
 
 SED_TEMPLATES = {"elliptical": (0.80, 3.0), "lenticular": (0.72, 2.5), "spiral": (0.55, 1.8),
@@ -68,15 +71,21 @@ class AstroObject:
         return float(np.clip(p, 0.05, 1.0))
     
     def finish_visualize(self, fig, title):
-        fig.update_layout(title=title, xaxis_title="RA[deg]", yaxis_title='dec[deg]')
-        fig.update_xaxes(autorange='reversed')
-        fig.update_yaxes(scaleanchor="x")
+
+        dark = "rgb(10, 10, 30)"   # matching later colorscale I think
+        fig.update_layout(title=title, width=600, height=600,
+            paper_bgcolor="rgba(0,0,0,0)", # transparent around the plot
+            plot_bgcolor=dark, # dark "sky" look
+            xaxis_title="RA [deg]", yaxis_title="dec [deg]")
+        fig.update_xaxes(autorange="reversed", showgrid=False, zeroline=False)
+        fig.update_yaxes(scaleanchor="x", showgrid=False, zeroline=False)
+        fig.show()
         return fig
 
 class Galaxy(AstroObject): 
     def __init__(self, ra, dec, z, q=1, mass=1e12, lensed=False, sed = 'None', agn_lum = 0.0):
         super().__init__(ra, dec, z)
-        self.q = 1 #axis ratio
+        self.q = q #axis ratio
         self.angle = 0 #eventually add random axis-tilt for display
         self.mass = mass #solar masses, to use astropy units? Not necessary?
         #self.lensed = lensed 
