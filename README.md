@@ -26,3 +26,17 @@ How are things distributed to match a "real" field survey?
 - [ ] Structure of software
 - [ ] Objects & Functionality
 - [ ] Gather Astronomical Features that would be included
+
+## Installation
+From the terminal, run
+```sh
+conda env create -f environment.yml
+```
+This will create a new conda environment called ```galaga-lab``` with all the required dependencies
+
+## Quick Start
+In the root directory, run
+```sh
+python app.py
+```
+The GUI is then available at `http://127.0.0.1:8050/`.
