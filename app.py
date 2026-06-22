@@ -24,12 +24,13 @@ import os
 
 from flask import session, Flask
 
+import Frontend.frontend_utils as frontu
+
 # Initialize the webserver
 server = Flask(__name__)
 server.secret_key = os.urandom(24)
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY], server=server)
-
+app = Dash(__name__, external_stylesheets=[dbc.themes.VAPOR], server=server)
 
 
 app.layout = dbc.Container([
@@ -44,12 +45,24 @@ app.layout = dbc.Container([
     ], className="my-2"),
 
     dbc.Row([
-        dbc.Col(dcc.Graph(id="main-graph", style={"display": "inline-block", "width":"100%"}), width=12, className="mb-0"),
+        dbc.Col(
+            dcc.Graph(id="main-graph", style={"width": "100%", "height": "70vh"}),
+            width=12, className="mb-0"
+        ),
     ], className="mt-0", justify="center", align="center"),
+
+    # Fires once on page load
+    dcc.Interval(id="init-interval", interval=1, max_intervals=1),
 
 ], fluid=True)
 
 
+@callback(
+    Output("main-graph", "figure"),
+    Input("init-interval", "n_intervals"),
+)
+def initialize_graph(n):
+    return frontu.init_graph()
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
