@@ -38,11 +38,22 @@ def add_object(fig, galaxy, xs, ys, grid, cs, color='red', size=8):
         textfont=dict(color="white", size=10),
         name=galaxy.name or f"RA={galaxy.ra} Dec={galaxy.dec}",
         hovertemplate=(
-            f"<b>{galaxy.name}</b><br>"
             f"RA: {ra_str}<br>"
             f"Dec: {dec_str}<extra></extra>"
         ),
     ))
+
+    fig.update_layout(
+        hoverlabel=dict(
+            bgcolor="rgba(20, 20, 50, 0.9)",   # background color
+            bordercolor="rgba(255,255,255,0.3)", # border color
+            font=dict(
+                color="white",
+                size=13,
+                family="monospace",
+            ),
+        )
+    )
 
     return fig
 
@@ -57,7 +68,16 @@ def add_catalog_objects(fig, catalog_path):
     for obj in catalog["objects"]:
 
         coord  = SkyCoord(ra=obj["ra"], dec=obj["dec"], unit=(u.hourangle, u.deg))
-        galaxy = Galaxy(ra=coord.ra.to(u.deg).value, dec=coord.dec.to(u.deg).value, z=obj["redshift"], name=obj["name"])
+        galaxy = Galaxy(
+                ra   = coord.ra.to(u.deg).value,
+                dec  = coord.dec.to(u.deg).value, 
+                z    = float(obj["redshift"]), 
+                name = obj["name"],
+                mass = float(obj["mass_msun"]),
+                q    = float(obj["q"]),
+                type = obj["type"],
+                size = float(obj["size_arcmin"]),
+            )
 
         xs, ys, grid, cs = galaxy.prepare_figure_data()
 
