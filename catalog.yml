@@ -6,14 +6,14 @@ objects:
       - NGC 4486
       - 3C 274
     type: Elliptical Galaxy
-    ra: 187.7059        # degrees
-    dec: 12.3911        # degrees
-    distance_mly: 53.5  # million light-years
+    ra:  "12:30:49.42338"   # hour angle
+    dec: "12:23:28.0439"   # degrees arcmin arcsec
+    distance_mly: 53.5     # million light-years
     redshift: 0.00428
     magnitude:
       apparent_v: 8.6
       absolute_v: -22.4
-    size_arcmin: 7.2    # angular diameter
+    size_arcmin: 7.2       # angular diameter
     constellation: Virgo
     notes: >
       Giant elliptical galaxy at the center of the Virgo Cluster.

@@ -3,9 +3,12 @@ File for the DASH interaction side
 '''
 
 from astropy.wcs import WCS
+from astropy.coordinates import SkyCoord
 import numpy as np
 import plotly.graph_objects as go
 import yaml
+from astropy import units as u
+from astropy.coordinates import Angle
 
 
 def add_object(fig, ra, dec, name, color="#44D9E9", size=8):
@@ -14,8 +17,13 @@ def add_object(fig, ra, dec, name, color="#44D9E9", size=8):
     Adds a dot at the projected Hammer-Aitoff location.
     Returns the modified figure.
     """
+    coord = SkyCoord(ra=ra, dec=dec, unit=(u.hourangle, u.deg))
+
     wcs = _make_wcs()
-    px = wcs.all_world2pix([[ra, dec]], 0)[0]
+    px = wcs.all_world2pix([[coord.ra.deg, coord.dec.deg]], 0)[0]
+
+    ra_str  = coord.ra.to_string(unit=u.hourangle, sep=('\u02b0', '\u1d50', '\u02e2'), pad=True)
+    dec_str = coord.dec.to_string(unit=u.deg, sep=('\u00b0', '\u2032', '\u2033'), pad=True, alwayssign=True)
 
     fig.add_trace(go.Scatter(
         x=[px[0]],
@@ -29,8 +37,8 @@ def add_object(fig, ra, dec, name, color="#44D9E9", size=8):
         name=name or f"RA={ra} Dec={dec}",
         hovertemplate=(
             f"<b>{name}</b><br>"
-            f"RA: {ra:.4f}°<br>"
-            f"Dec: {dec:.4f}°<extra></extra>"
+            f"RA: {ra_str}<br>"
+            f"Dec: {dec_str}<extra></extra>"
         ),
     ))
 
