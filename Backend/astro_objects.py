@@ -11,6 +11,9 @@ Things to add:
 import numpy as np
 from astropy.cosmology import Planck18 as cosmo
 import plotly.graph_objects as go
+from astropy.coordinates import SkyCoord
+from astropy import units as u
+from astropy.wcs import WCS
 
 '''
 SED Template: Spectral Energy Distribution is a galaxy's brightness as wavelength
@@ -29,11 +32,26 @@ SED_TEMPLATES = {"elliptical": (0.80, 3.0), "lenticular": (0.72, 2.5), "spiral":
                  "irregular": (0.42, 1.2), "starburst":  (0.30, 0.8)}
 
 
+# Shared helper function
+def make_wcs():
+        wcs = WCS(naxis=2)
+        wcs.wcs.crpix = [0, 0]
+        wcs.wcs.cdelt = [1.0, 1.0]
+        wcs.wcs.crval = [180, 0]          # center of projection
+        wcs.wcs.ctype = ["RA---AIT", "DEC--AIT"]
+        return wcs
+
+
 class AstroObject: 
-    def __init__(self, ra, dec, z):
+    def __init__(self, ra, dec, z, name=None):
+        """
+        ra, dec in degrees
+        """
         self.ra = ra
         self.dec = dec 
+        self.coord = SkyCoord(ra=ra, dec=dec, unit=(u.deg, u.deg))
         self.z = z
+        self.name = name
         self.d = cosmo.luminosity_distance(z).to_value("Mpc")
         self.color = 0
         self.mag = 0
@@ -87,8 +105,8 @@ class AstroObject:
         return fig
 
 class Galaxy(AstroObject): 
-    def __init__(self, ra, dec, z, q=1, mass=1e12, lensed=False, sed = 'None', agn_lum = 0.0):
-        super().__init__(ra, dec, z)
+    def __init__(self, ra, dec, z, name, q=1, mass=1e12, lensed=False, sed = 'None', agn_lum = 0.0):
+        super().__init__(ra, dec, z, name)
         self.q = q #axis ratio
         self.angle = 0 #eventually add random axis-tilt for display
         self.mass = mass #solar masses, to use astropy units? Not necessary?
@@ -131,33 +149,39 @@ class Galaxy(AstroObject):
 
         return self.mag
     
-    def visualize(self): 
-        #temporarily build fake sky grid centered on galaxy
-        width = 0.01
-        n_pix = 200 
 
-        xs = np.linspace(self.ra - width, self.ra + width, n_pix)
-        ys = np.linspace(self.dec - width, self.dec + width, n_pix)
-        X, Y = np.meshgrid(xs, ys) #builds grid
+    def prepare_figure_data(self, sky_width_deg=2.0):
+        wcs = make_wcs()
 
-        #offsets for angles ("zeroing") 
-        dx, dy = X - self.ra, Y-self.dec 
+        # Find pixel position of galaxy center
+        cx, cy = wcs.all_world2pix([[self.ra, self.dec]], 0)[0]
 
-        #rotate coords for tilt of ellipse
+        edge_ra  = wcs.all_world2pix([[self.ra + sky_width_deg, self.dec]], 0)[0][0]
+        pix_width = abs(edge_ra - cx)
+
+        n_pix = 200
+        xs = np.linspace(cx - pix_width, cx + pix_width, n_pix)
+        ys = np.linspace(cy - pix_width, cy + pix_width, n_pix)
+        X, Y = np.meshgrid(xs, ys)
+
+        dx, dy = X - cx, Y - cy
+
         th = np.radians(self.angle)
-        xr = dx*np.cos(th) + dy*np.sin(th)
-        yr = -dx*np.sin(th) + dy*np.cos(th)
+        xr = dx * np.cos(th) + dy * np.sin(th)
+        yr = -dx * np.sin(th) + dy * np.cos(th)
 
-        #squash with ellipiticity
-        size = width/3.0
-        r2 = (xr / size) ** 2 + (yr / (size * self.q)) ** 2 #ellipticity equation
+        size = pix_width / 3.0
+        r2 = (xr / size) ** 2 + (yr / (size * self.q)) ** 2
 
-        # surface brightness gaussian -> bright core, faint edges
-        # scaled by peak_brightness() so fainter galaxies render dimmer overall
         grid = self.peak_brightness() * np.exp(-0.5 * r2)
+        cs = [[0.0, "#1A0933"], [1.0, self.get_hue()]]
 
-        # near-black background at 0 up to the galaxy's hue at 1
-        cs = [[0.0, "rgb(10,10,30)"], [1.0, self.get_hue()]]
+        return xs, ys, grid, cs
+
+
+    def visualize(self): 
+        
+        xs, ys, grid, cs = self.prepare_figure_data()
         fig = go.Figure(go.Heatmap(x=xs, y=ys, z=grid, zmin=0, zmax=1, colorscale=cs, showscale=False))
 
         return self.finish_visualize(fig, f"Galaxy with z={self.z} and {self.color:.2f}")
