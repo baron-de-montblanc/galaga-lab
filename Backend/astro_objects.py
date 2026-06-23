@@ -2,6 +2,10 @@
 File for classes and making the astro objects class and any subclasses/objects for galaxies, etc
 
 Fill out docstrings...
+
+Things to add: 
+1. Ellipticity range dependent on SED type
+2. Exposure-time-dependence so 
 '''
 
 import numpy as np
@@ -10,7 +14,7 @@ import plotly.graph_objects as go
 
 '''
 SED Template: Spectral Energy Distribution is a galaxy's brightness as wavelength
-Instead of modeling, just give it an approximated "type" by a dictionary that captures: 
+Instead of modeling, just an approximated "type" by a dictionary that captures: 
 1. base_color (intrisic g-r color)
 2. mass_to_light (solar masses per solar luminosity)
 ordered from red to blue
