@@ -161,3 +161,46 @@ class Galaxy(AstroObject):
         fig = go.Figure(go.Heatmap(x=xs, y=ys, z=grid, zmin=0, zmax=1, colorscale=cs, showscale=False))
 
         return self.finish_visualize(fig, f"Galaxy with z={self.z} and {self.color:.2f}")
+    
+class Cluster(AstroObject)
+    def __init__ (self, ra, dec, z, q, n, r)
+        self.q = q # squash factor of cluster from y-axis
+        self.ra = ra #Right Ascention, equatorial positon in sky
+        self.dec = dec #Declination, angular distance from the equator
+        self.z = z #Redshift
+        self.n = n #Number of galaxies in cluster
+        self.r = r #Radius of the cluster
+    def generate_members(self)
+        """"
+        four major arrrays: galaxy types, list of random masses for individual points, 
+        ra and dec of all points
+        """"
+        #Galaxy RAs and Decs
+        r_Mpc = self.r # radius of cluster in Mpc
+        dA_Mpc = cosmo.angular_diameter_distance(self.z) # distance from observer to cluster in Mpc
+        cluster_size = np.degrees(r_Mpc/dA_Mpc) # gets angular size of cluster in degrees (from rads)
+
+        dx = np.random.normal(0, cluster_size, self.n) # returns array of random positions along x axis (RA)
+        dy = self.q * np.random.normal(0, cluster_size, self.n) # returns array of random positions along y axis (dec), with a boundary defined by q
+        cluster_ras = self.ra + dx # random list of individual galaxies' RAs in cluster 
+        cluster_decs = self.dec + dy # random list of individual galaxies' decs in cluster 
+        
+        #Galaxy masses
+        cluster_ms = np.power(10, np.random.uniform(9, 11, self.n)) # generates array of standard masses for cluster galaxies
+
+        #Galaxy redshifts
+        cluster_zs = np.random.normal(0, 0.005, self.n) + self.z # generates array of cluster galaxy redshift
+
+        cluster_members = np.zeros(self.n)
+        for i in range(self.n):
+            cluster_members[i]= Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i], cluster_ms[i], sed = "elliptical")
+        return cluster_members
+            
+
+
+
+       
+
+
+
+        
