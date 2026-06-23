@@ -105,28 +105,30 @@ class AstroObject:
         return fig
 
 class Galaxy(AstroObject): 
-    def __init__(self, ra, dec, z, name, q=1, mass=1e12, lensed=False, sed = 'None', agn_lum = 0.0):
+    def __init__(self, ra, dec, z, name, size=7, type="spiral", q=1, mass=1e12, lensed=False, sed = 'None', agn_lum = 0.0):
         super().__init__(ra, dec, z, name)
-        self.q = q #axis ratio
-        self.angle = 0 #eventually add random axis-tilt for display
-        self.mass = mass #solar masses, to use astropy units? Not necessary?
+        self.q     = q       # axis ratio
+        self.angle = 0       # eventually add random axis-tilt for display
+        self.mass  = mass    # solar masses, to use astropy units? Not necessary?
         #self.lensed = lensed 
-        self.sed = sed #for stellar population type
-        self.agn = agn_lum #AGN activity
+        self.sed   = sed     # for stellar population type
+        self.agn   = agn_lum # AGN activity
+        self.type  = type    # Galaxy type
+        self.size  = size    # Angular diameter in arcmin
 
         #setting colors
         self.color = self.estimate_color()
-        self.mag = self.estimate_mag()
+        self.mag   = self.estimate_mag()
     
     def get_sed_template(self):
-        return SED_TEMPLATES.get(self.sed, SED_TEMPLATES["spiral"])
+        return SED_TEMPLATES.get(self.sed, SED_TEMPLATES[self.type])
 
     def estimate_color(self):
         #pull template
         base_color = self.get_sed_template()[0]
 
         #crude redshift color shift
-        color = base_color + 0.3 * self.z
+        color = base_color + self.z
         self.color = color
         return self.color 
     
@@ -150,7 +152,10 @@ class Galaxy(AstroObject):
         return self.mag
     
 
-    def prepare_figure_data(self, sky_width_deg=2.0):
+    def prepare_figure_data(self):
+
+        sky_width_deg = self.size / 5  # scale actual object size to size on the plot
+        
         wcs = make_wcs()
 
         # Find pixel position of galaxy center
@@ -174,7 +179,7 @@ class Galaxy(AstroObject):
         r2 = (xr / size) ** 2 + (yr / (size * self.q)) ** 2
 
         grid = self.peak_brightness() * np.exp(-0.5 * r2)
-        cs = [[0.0, "#1A0933"], [1.0, self.get_hue()]]
+        cs = [[0.0, "rgba(0,0,0,0)"], [1.0, self.get_hue()]]
 
         return xs, ys, grid, cs
 
