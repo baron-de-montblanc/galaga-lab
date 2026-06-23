@@ -36,8 +36,8 @@ objects:
       apparent_v: 3.44
       absolute_v: -21.5
     size_arcmin: 190.0
-    mass_msun: 1.0e12        # solar masses
-    q: 0.33                  # axis ratio (minor/major); highly inclined ~77 deg
+    mass_msun: 1.0e12       
+    q: 0.33                 
     constellation: Andromeda
     notes: >
       Nearest large spiral galaxy to the Milky Way and the most distant object
@@ -57,8 +57,8 @@ objects:
       apparent_v: 5.72
       absolute_v: -18.9
     size_arcmin: 70.8
-    mass_msun: 5.0e10        # solar masses
-    q: 0.53                  # axis ratio (minor/major); inclined ~54 deg
+    mass_msun: 5.0e10       
+    q: 0.53                 
     constellation: Triangulum
     notes: >
       Third-largest galaxy in the Local Group. One of the most distant objects
@@ -78,8 +78,8 @@ objects:
       apparent_v: 2.7
       absolute_v: -17.1
     size_arcmin: 318.0
-    mass_msun: 7.0e9         # solar masses
-    q: 0.75                  # axis ratio (minor/major); irregular, roughly round
+    mass_msun: 7.0e9        
+    q: 0.75                 
     constellation: Tucana
     notes: >
       Companion satellite galaxy to the Milky Way, gravitationally linked to the LMC.
@@ -100,8 +100,8 @@ objects:
       apparent_v: 6.84
       absolute_v: -21.9
     size_arcmin: 25.7
-    mass_msun: 1.0e12        # solar masses
-    q: 0.77                  # axis ratio (minor/major)
+    mass_msun: 1.0e12      
+    q: 0.77                
     constellation: Centaurus
     notes: >
       Nearest radio galaxy to Earth and one of the brightest radio sources in the sky.
