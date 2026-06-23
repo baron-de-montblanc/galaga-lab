@@ -11,7 +11,7 @@ from astropy import units as u
 from Backend.astro_objects import Galaxy, make_wcs
 
 
-def add_object(fig, galaxy, xs, ys, grid, cs, color='red', size=8):
+def add_object(fig, galaxy, xs, ys, grid, cs):
 
     wcs = make_wcs()
     px = wcs.all_world2pix([[galaxy.coord.ra.deg, galaxy.coord.dec.deg]], 0)[0]
@@ -20,27 +20,29 @@ def add_object(fig, galaxy, xs, ys, grid, cs, color='red', size=8):
     dec_str = galaxy.coord.dec.to_string(unit=u.deg, sep=('\u00b0', '\u2032', '\u2033'), pad=True, alwayssign=True)
 
     fig.add_trace(go.Heatmap(
-        x=xs, y=ys, z=grid,
-        zmin=0, zmax=1,
-        colorscale=cs,
-        showscale=False,
+        x          = xs, 
+        y          = ys, 
+        z          = grid,
+        zmin       = 0,
+        zmax       = 1,
+        colorscale = cs,
+        showscale  = False,
     ))
 
     fig.add_trace(go.Scatter(
-        x=[px[0]],
-        y=[px[1]],
-        mode="markers+text" if galaxy.name else "markers",
-        marker=dict(color=color, size=size, symbol="circle",
-            line=dict(color="white", width=0.5),
-            opacity=0),
-        text=[galaxy.name],
-        textposition="top center",
-        textfont=dict(color="white", size=10),
-        name=galaxy.name or f"RA={galaxy.ra} Dec={galaxy.dec}",
-        hovertemplate=(
+        x             = [px[0]],
+        y             = [px[1]],
+        mode          = "markers+text" if galaxy.name else "markers",
+        marker        = dict(opacity=0),
+        text          = [galaxy.name],
+        textposition  = "top center",
+        textfont      = dict(color="white", size=10),
+        name          = galaxy.name or f"RA={galaxy.ra} Dec={galaxy.dec}",
+        hovertemplate = (
             f"RA: {ra_str}<br>"
             f"Dec: {dec_str}<extra></extra>"
         ),
+        customdata = [[galaxy.name, galaxy.notes]],
     ))
 
     fig.update_layout(
@@ -69,14 +71,15 @@ def add_catalog_objects(fig, catalog_path):
 
         coord  = SkyCoord(ra=obj["ra"], dec=obj["dec"], unit=(u.hourangle, u.deg))
         galaxy = Galaxy(
-                ra   = coord.ra.to(u.deg).value,
-                dec  = coord.dec.to(u.deg).value, 
-                z    = float(obj["redshift"]), 
-                name = obj["name"],
-                mass = float(obj["mass_msun"]),
-                q    = float(obj["q"]),
-                type = obj["type"],
-                size = float(obj["size_arcmin"]),
+                ra    = coord.ra.to(u.deg).value,
+                dec   = coord.dec.to(u.deg).value, 
+                z     = float(obj["redshift"]), 
+                name  = obj["name"],
+                mass  = float(obj["mass_msun"]),
+                q     = float(obj["q"]),
+                type  = obj["type"],
+                size  = float(obj["size_arcmin"]),
+                notes = obj["notes"]
             )
 
         xs, ys, grid, cs = galaxy.prepare_figure_data()

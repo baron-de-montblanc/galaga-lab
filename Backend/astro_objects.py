@@ -47,14 +47,14 @@ class AstroObject:
         """
         ra, dec in degrees
         """
-        self.ra = ra
-        self.dec = dec 
+        self.ra    = ra
+        self.dec   = dec 
         self.coord = SkyCoord(ra=ra, dec=dec, unit=(u.deg, u.deg))
-        self.z = z
-        self.name = name
-        self.d = cosmo.luminosity_distance(z).to_value("Mpc")
+        self.z     = z
+        self.name  = name
+        self.d     = cosmo.luminosity_distance(z).to_value("Mpc")
         self.color = 0
-        self.mag = 0
+        self.mag   = 0
 
     ## some shared physics/cosmology/coloring/display stuff
     def distance_modulus(self): 
@@ -72,13 +72,14 @@ class AstroObject:
         Interpolate between a blue and a red rgb sequence
         Makes a direct blue-to-red scale
         '''
-        c = np.clip((self.color - 0.3) / 0.6, 0.0, 1.0) #"clips" color to 0, 1
+        c    = np.clip((self.color - 0.3) / 0.6, 0.0, 1.0) #"clips" color to 0, 1
         blue = np.array([150, 180, 255])
-        red = np.array([255, 140, 110])
+        red  = np.array([255, 140, 110])
+
         r, g, b = (blue + c*(red-blue)).astype(int)
         return f"rgb({r}, {g}, {b})" #formatted this way for plotly 
     
-    def peak_brightness(self):
+    def peak_brightness(self, faint=25.0, bright=15.0):
         '''
         map magnitude to a peak brightness
         range it [0.05, 1] to test...
@@ -86,8 +87,6 @@ class AstroObject:
         Less than 15 mag is the "core" 
         Greater than 25 (LSST depths) is 0.05, linear between (just for display)
         '''
-        faint = 25.0
-        bright = 15.0
 
         p = (faint - self.mag) / (faint-bright)
         return float(np.clip(p, 0.05, 1.0))
@@ -105,16 +104,26 @@ class AstroObject:
         return fig
 
 class Galaxy(AstroObject): 
-    def __init__(self, ra, dec, z, name, size=7, type="spiral", q=1, mass=1e12, lensed=False, sed = 'None', agn_lum = 0.0):
+    def __init__(self, ra, dec, z, name, 
+            size    = 7, 
+            type    = "spiral", 
+            q       = 1,
+            mass    = 1e12, 
+            lensed  = False, 
+            sed     = 'None', 
+            agn_lum = 0.0,
+            notes   = ""
+            ):
         super().__init__(ra, dec, z, name)
         self.q     = q       # axis ratio
         self.angle = 0       # eventually add random axis-tilt for display
-        self.mass  = mass    # solar masses, to use astropy units? Not necessary?
+        self.mass  = mass    # solar masses
         #self.lensed = lensed 
         self.sed   = sed     # for stellar population type
         self.agn   = agn_lum # AGN activity
         self.type  = type    # Galaxy type
         self.size  = size    # Angular diameter in arcmin
+        self.notes = notes   # string that describes the object
 
         #setting colors
         self.color = self.estimate_color()
@@ -150,7 +159,7 @@ class Galaxy(AstroObject):
         self.mag = abs_mag + dist_mod
 
         return self.mag
-    
+
 
     def prepare_figure_data(self):
 
