@@ -8,6 +8,9 @@ Generating a random field of astronomical objects in an approachable, non-techni
 Blah
 
 ## TODOs
+Overall 
+- [ ] What the hell does galaga stand for
+
 Objects
 - [ ] Actual brightness testing/"exposure time"/make high z objects actually visible (make base brightness more clear?)
 
