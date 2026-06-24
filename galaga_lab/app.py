@@ -57,6 +57,18 @@ app.layout = dbc.Container([
         ),
     ], className="mt-0", justify="center", align="center"),
 
+    dbc.Modal([
+        dbc.ModalHeader(
+            dbc.ModalTitle(id="info-panel-title", style={
+                "position": "absolute",
+                "left": "50%",
+                "transform": "translateX(-50%)",
+            }),
+            className="position-relative",
+        ),
+        dbc.ModalBody(id="info-panel-body", className="text-center"),
+    ], id="info-panel", is_open=False, size="md"),
+
     # Fires once on page load
     dcc.Interval(id="init-interval", interval=1, max_intervals=1),
 
@@ -69,6 +81,26 @@ app.layout = dbc.Container([
 )
 def initialize_graph(n):
     return frontu.init_graph(catalog_path=CATALOG_PATH)
+
+
+@callback(
+    Output("info-panel", "is_open"),
+    Output("info-panel-title", "children"),
+    Output("info-panel-body", "children"),
+    Input("main-graph", "clickData"),
+    prevent_initial_call=True,
+)
+def on_galaxy_click(clickData):
+    if not clickData:
+        return False, "", ""
+
+    point = clickData["points"][0]
+    if "customdata" not in point:
+        return no_update, no_update, no_update
+
+    name, notes = point["customdata"]
+    return True, name, notes
+
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)

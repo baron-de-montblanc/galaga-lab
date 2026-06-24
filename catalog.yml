@@ -5,19 +5,105 @@ objects:
       - Virgo A
       - NGC 4486
       - 3C 274
-    type: Elliptical Galaxy
+    type: elliptical
     ra:  "12:30:49.42338"   # hour angle
-    dec: "12:23:28.0439"   # degrees arcmin arcsec
-    distance_mly: 53.5     # million light-years
+    dec: "12:23:28.0439"    # degrees arcmin arcsec
+    distance_mly: 53.5      # million light-years
     redshift: 0.00428
     magnitude:
       apparent_v: 8.6
       absolute_v: -22.4
-    size_arcmin: 7.2       # angular diameter
+    size_arcmin: 7.2         # angular diameter
+    mass_msun: 2.4e12        # solar masses
+    q: 0.82                  # axis ratio (minor/major)
     constellation: Virgo
     notes: >
       Giant elliptical galaxy at the center of the Virgo Cluster.
       Contains a supermassive black hole of ~6.5 billion solar masses,
       the first black hole ever directly imaged (Event Horizon Telescope, 2019).
       Notable for its relativistic jet extending ~5000 light-years.
- 
+
+  - name: Andromeda Galaxy
+    aliases:
+      - M31
+      - NGC 224
+    type: spiral
+    ra:  "00:42:44.330"
+    dec: "+41:16:09.40"
+    distance_mly: 2.537
+    redshift: -0.001001
+    magnitude:
+      apparent_v: 3.44
+      absolute_v: -21.5
+    size_arcmin: 190.0
+    mass_msun: 1.0e12       
+    q: 0.33                 
+    constellation: Andromeda
+    notes: >
+      Nearest large spiral galaxy to the Milky Way and the most distant object
+      visible to the naked eye. Contains roughly one trillion stars. On a
+      collision course with the Milky Way, expected to merge in ~4.5 billion years.
+  
+  - name: Triangulum Galaxy
+    aliases:
+      - M33
+      - NGC 598
+    type: spiral
+    ra:  "01:33:50.900"
+    dec: "+30:39:36.70"
+    distance_mly: 2.73
+    redshift: -0.000607
+    magnitude:
+      apparent_v: 5.72
+      absolute_v: -18.9
+    size_arcmin: 70.8
+    mass_msun: 5.0e10       
+    q: 0.53                 
+    constellation: Triangulum
+    notes: >
+      Third-largest galaxy in the Local Group. One of the most distant objects
+      visible to the naked eye under ideal conditions. Notable for its prominent
+      H II regions and lack of a central bulge.
+
+  - name: Small Magellanic Cloud
+    aliases:
+      - SMC
+      - NGC 292
+    type: irregular
+    ra:  "00:52:44.800"
+    dec: "-72:49:43.00"
+    distance_mly: 0.197
+    redshift: 0.000527
+    magnitude:
+      apparent_v: 2.7
+      absolute_v: -17.1
+    size_arcmin: 318.0
+    mass_msun: 7.0e9        
+    q: 0.75                 
+    constellation: Tucana
+    notes: >
+      Companion satellite galaxy to the Milky Way, gravitationally linked to the LMC.
+      Connected to the Milky Way by the Magellanic Stream, a trail of neutral hydrogen gas.
+      Visible to the naked eye from the Southern Hemisphere.
+
+  - name: Centaurus A
+    aliases:
+      - NGC 5128
+      - Caldwell 77
+      - PKS 1322-427
+    type: elliptical
+    ra:  "13:25:27.615"
+    dec: "-43:01:08.81"
+    distance_mly: 13.7
+    redshift: 0.001825
+    magnitude:
+      apparent_v: 6.84
+      absolute_v: -21.9
+    size_arcmin: 25.7
+    mass_msun: 1.0e12      
+    q: 0.77                
+    constellation: Centaurus
+    notes: >
+      Nearest radio galaxy to Earth and one of the brightest radio sources in the sky.
+      Features a dramatic dust lane bisecting its core, remnant of a past merger
+      with a spiral galaxy. Powers a relativistic jet extending over a million light-years.
