@@ -162,7 +162,9 @@ class Galaxy(AstroObject):
 
 
     def prepare_figure_data(self):
-
+        '''
+        possible: incorporate ang diameter distance instead of div by 5
+        '''
         sky_width_deg = self.size / 5  # scale actual object size to size on the plot
         
         wcs = make_wcs()
