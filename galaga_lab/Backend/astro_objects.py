@@ -43,7 +43,7 @@ def make_wcs():
 
 
 class AstroObject: 
-    def __init__(self, ra, dec, z, name=None):
+    def __init__(self, ra, dec, z, name=None, exposure_time=1.0):
         """
         ra, dec in degrees
         """
@@ -55,6 +55,7 @@ class AstroObject:
         self.d     = cosmo.luminosity_distance(z).to_value("Mpc")
         self.color = 0
         self.mag   = 0
+        self.exposure_time = exposure_time
 
     ## some shared physics/cosmology/coloring/display stuff
     def distance_modulus(self): 
@@ -79,7 +80,7 @@ class AstroObject:
         r, g, b = (blue + c*(red-blue)).astype(int)
         return f"rgb({r}, {g}, {b})" #formatted this way for plotly 
     
-    def peak_brightness(self, faint=25.0, bright=15.0):
+    def peak_brightness(self, faint=25.0, bright=15.0, exposure_time=None):
         '''
         map magnitude to a peak brightness
         range it [0.05, 1] to test...
@@ -87,9 +88,26 @@ class AstroObject:
         Less than 15 mag is the "core" 
         Greater than 25 (LSST depths) is 0.05, linear between (just for display)
         '''
+        # easier integration to slider maybe?
+        if exposure_time is None:
+            exposure_time = self.exposure_time
+        
+        '''
+        Could just do 
+        for galaxy in the field: 
+            set self.exposure_time to current slider value
+        '''
 
-        p = (faint - self.mag) / (faint-bright)
-        return float(np.clip(p, 0.05, 1.0))
+        exposure_time = max(exposure_time, 1e-3)   # make slider min > 0
+
+        floor = 0.12
+        ceiling = 1.5 #was 1.0, 2.0 a bit too bright
+        DEPTH_GAIN = 2.0 #for how "sensitive" the slider is/an object is to exposure time; 1.25 is realistic but unresponsive
+
+        m_lim = faint + DEPTH_GAIN * np.log10(exposure_time)
+
+        p = (m_lim - self.mag) / (faint - bright)
+        return float(np.clip(p, floor, ceiling))
     
     def finish_visualize(self, fig, title):
 
@@ -206,7 +224,8 @@ class Galaxy(AstroObject):
 Cluster class
 '''    
 class Cluster(AstroObject):
-    def __init__ (self, ra, dec, z, q, n, r):
+    def __init__ (self, ra, dec, z, name, q, n, r, exposure_time, bcg_scale=1.5):
+        super().__init__(ra, dec, z, name, exposure_time)
         self.q = q # squash factor of cluster from y-axis
         self.ra = ra #Right Ascention, equatorial positon in sky
         self.dec = dec #Declination, angular distance from the equator
@@ -214,6 +233,7 @@ class Cluster(AstroObject):
         self.n = n #Number of galaxies in cluster
         self.r = r #Radius of the cluster
         self.cluster_size = 0
+        self.bcg_scale = bcg_scale
         self.members = self.generate_members() # initializes the cluster with its members
 
     def generate_members(self):
@@ -231,6 +251,7 @@ class Cluster(AstroObject):
         dy = self.q * np.random.normal(0, cluster_size, self.n) # returns array of random positions along y axis (dec), with a boundary defined by q
         cluster_ras = self.ra + dx # random list of individual galaxies' RAs in cluster 
         cluster_decs = self.dec + dy # random list of individual galaxies' decs in cluster 
+        orient_angle = np.random.uniform(0, np.pi)
         
         #Galaxy masses
         cluster_ms = np.power(10, np.random.uniform(9, 11, self.n)) # generates array of standard masses for cluster galaxies
@@ -245,30 +266,48 @@ class Cluster(AstroObject):
         cl_gal_types = np.random.choice(gal_types, self.n, p=np.array([0.7,0.2,0.1]))
 
         # fix by appending instead of initializing
+        '''
         cluster_members = np.array([], dtype=Galaxy)
         for i in range(self.n):
             gal= Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i], cluster_ms[i], sed = cl_gal_types[i])
             cluster_members = np.append(cluster_members, gal)
-        
+        '''
+
+        # loops over members to properly create Galaxy objects
+        cluster_members = np.array([], dtype=Galaxy)
+
+        # adjust size for jade's code
+        member_size = cluster_size / 4
+
+        for i in range(self.n):
+            gal = Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i],
+                name=f"member_{i}", size=member_size, mass=cluster_ms[i], sed=cl_gal_types[i])
+            cluster_members = np.append(cluster_members, gal)
+
+        # add BCG
+        bcg_name = f"BCG of {self.name}"
+        bcg_size = member_size * self.bcg_scale #before doing this it gave a cool DM halo visualization
+        bcg = Galaxy(self.ra, self.dec, self.z, q=0.7, mass=1e12, sed="elliptical", name=bcg_name, size=bcg_size)
+        bcg.angle = np.random.uniform(0, 180)
+        cluster_members = np.insert(cluster_members, 0, bcg)
+
         return cluster_members
     
     def visualize_cluster(self):
         '''
         Visualize the cluster independently for testing
         '''
-        width = self.cluster_size + 0.05 #might need to adjust
-        n_pix = 200 
-
-        xs = np.linspace(self.ra - width, self.ra + width, n_pix)
-        ys = np.linspace(self.dec - width, self.dec + width, n_pix)
-        X, Y = np.meshgrid(xs, ys)
-
         cluster_fig = go.Figure()
-        for galaxy in self.members(): 
-            #go through, visualize galaxies on plane
-            cluster_fig.add_trace(galaxy.visualize()) #not sure if this is how this works
 
-        return cluster_fig
+        for galaxy in self.members: 
+            xs, ys, grid, cs = galaxy.prepare_figure_data() 
+
+            cluster_fig.add_trace(go.Heatmap(x=xs, y=ys, z=grid, 
+                                zmin=0, zmax=1, colorscale=cs, showscale=False))
+            
+            title = f"Cluster at z={self.z:.3f} with {self.n} members"
+        
+        return self.finish_visualize(cluster_fig, title)
 
 
 
