@@ -163,7 +163,7 @@ class Galaxy(AstroObject):
         return self.finish_visualize(fig, f"Galaxy with z={self.z} and {self.color:.2f}")
 
 '''
-Minor debugging! Couple colons after class, def lines
+Cluster class
 '''    
 class Cluster(AstroObject):
     def __init__ (self, ra, dec, z, q, n, r):
@@ -173,6 +173,8 @@ class Cluster(AstroObject):
         self.z = z #Redshift
         self.n = n #Number of galaxies in cluster
         self.r = r #Radius of the cluster
+        self.members = self.generate_members() # initializes the cluster with its members
+
     def generate_members(self):
         '''
         four major arrrays: galaxy types, list of random masses for individual points, 
