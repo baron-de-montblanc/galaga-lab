@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tools.setuptools]
+package_dir = {""="src"}
+
+[tool.setuptools.package-dir]
+mypkg = "galaga_lab"
+
+[project]
+name = "galaga_lab"
+version = "0.0.1" 
+dependencies = [
+	"astropy", 
+	"numpy", 
+	"dash", 
+	"dash_bootstrap_components", 
+	"Flask",
+	"plotly",
+	"PyYAML"
+]
