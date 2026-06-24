@@ -11,6 +11,7 @@ Things to add:
 import numpy as np
 from astropy.cosmology import Planck18 as cosmo
 import plotly.graph_objects as go
+import astropy.cosmology.units as cu
 
 '''
 SED Template: Spectral Energy Distribution is a galaxy's brightness as wavelength
@@ -173,6 +174,7 @@ class Cluster(AstroObject):
         self.z = z #Redshift
         self.n = n #Number of galaxies in cluster
         self.r = r #Radius of the cluster
+        self.cluster_size = 0
         self.members = self.generate_members() # initializes the cluster with its members
 
     def generate_members(self):
@@ -182,8 +184,9 @@ class Cluster(AstroObject):
         '''
         #Galaxy RAs and Decs
         r_Mpc = self.r # radius of cluster in Mpc
-        dA_Mpc = cosmo.angular_diameter_distance(self.z) # distance from observer to cluster in Mpc
+        dA_Mpc = cosmo.angular_diameter_distance(self.z).value # distance from observer to cluster in Mpc
         cluster_size = np.degrees(r_Mpc/dA_Mpc) # gets angular size of cluster in degrees (from rads)
+        self.cluster_size = cluster_size #saving this for later
 
         dx = np.random.normal(0, cluster_size, self.n) # returns array of random positions along x axis (RA)
         dy = self.q * np.random.normal(0, cluster_size, self.n) # returns array of random positions along y axis (dec), with a boundary defined by q
@@ -206,7 +209,24 @@ class Cluster(AstroObject):
             cluster_members[i]= Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i], cluster_ms[i], sed = cl_gal_types[i])
         
         return cluster_members
-            
+    
+    def visualize_cluster(self):
+        '''
+        Visualize the cluster independently for testing
+        '''
+        width = self.cluster_size + 0.05 #might need to adjust
+        n_pix = 200 
+
+        xs = np.linspace(self.ra - width, self.ra + width, n_pix)
+        ys = np.linspace(self.dec - width, self.dec + width, n_pix)
+        X, Y = np.meshgrid(xs, ys)
+
+        cluster_fig = go.Figure()
+        for galaxy in self.members(): 
+            #go through, visualize galaxies on plane
+            cluster_fig.add_trace(galaxy.visualize()) #not sure if this is how this works
+
+        return cluster_fig
 
 
 
