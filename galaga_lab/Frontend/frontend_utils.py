@@ -12,10 +12,22 @@ from astropy.coordinates import Angle
 
 
 def add_object(fig, ra, dec, name, color="#44D9E9", size=8):
-    """
-    Takes in a go.Figure object and an RA/Dec value (in degrees).
+    """On-Sky Object Position Projection
+
+    Takes in a go.Figure object and an RA/Dec value (in degrees), adds to projected location.
     Adds a dot at the projected Hammer-Aitoff location.
     Returns the modified figure.
+
+    Args:
+        fig (go.Figure object): go.Figure object from plotly. Typically displaying a Galaxy object.
+        ra (np.float): float value; degrees. Right Ascension to put on the on-sky projection. 
+        dec (np.float): float value; degrees. Declination to put on the on-sky projection. 
+        name (string): string value. Name of object on the sky. 
+        color (string): Color of the marker on the graph
+        size (int): integer value. Size of object on-sky
+    
+    Returns:
+        fig (go.Figure object): go.Figure object from plotly. Modified graph object for displaying through DASH.
     """
     coord = SkyCoord(ra=ra, dec=dec, unit=(u.hourangle, u.deg))
 
