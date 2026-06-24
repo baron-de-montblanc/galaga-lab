@@ -24,7 +24,7 @@ import os
 
 from flask import session, Flask
 
-import Frontend.frontend_utils as frontu
+import galaga_lab.Frontend.frontend_utils as frontu
 
 
 # =========== Global variables ==============

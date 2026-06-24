@@ -199,14 +199,17 @@ class Cluster(AstroObject):
         #Galaxy redshifts
         cluster_zs = np.random.normal(0, 0.005, self.n) + self.z # generates array of cluster galaxy redshift
 
-        cluster_members = np.zeros(self.n)
+        #cluster_members = np.zeros(self.n)
 
         #Galaxy Types
         gal_types = np.array(["elliptical", "spiral", "irregular"])
         cl_gal_types = np.random.choice(gal_types, self.n, p=np.array([0.7,0.2,0.1]))
 
+        # fix by appending instead of initializing
+        cluster_members = np.array([], dtype=Galaxy)
         for i in range(self.n):
-            cluster_members[i]= Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i], cluster_ms[i], sed = cl_gal_types[i])
+            gal= Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i], cluster_ms[i], sed = cl_gal_types[i])
+            cluster_members = np.append(cluster_members, gal)
         
         return cluster_members
     
