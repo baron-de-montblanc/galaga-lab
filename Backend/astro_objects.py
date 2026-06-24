@@ -161,20 +161,23 @@ class Galaxy(AstroObject):
         fig = go.Figure(go.Heatmap(x=xs, y=ys, z=grid, zmin=0, zmax=1, colorscale=cs, showscale=False))
 
         return self.finish_visualize(fig, f"Galaxy with z={self.z} and {self.color:.2f}")
-    
-class Cluster(AstroObject)
-    def __init__ (self, ra, dec, z, q, n, r)
+
+'''
+Minor debugging! Couple colons after class, def lines
+'''    
+class Cluster(AstroObject):
+    def __init__ (self, ra, dec, z, q, n, r):
         self.q = q # squash factor of cluster from y-axis
         self.ra = ra #Right Ascention, equatorial positon in sky
         self.dec = dec #Declination, angular distance from the equator
         self.z = z #Redshift
         self.n = n #Number of galaxies in cluster
         self.r = r #Radius of the cluster
-    def generate_members(self)
-        """"
+    def generate_members(self):
+        '''
         four major arrrays: galaxy types, list of random masses for individual points, 
         ra and dec of all points
-        """"
+        '''
         #Galaxy RAs and Decs
         r_Mpc = self.r # radius of cluster in Mpc
         dA_Mpc = cosmo.angular_diameter_distance(self.z) # distance from observer to cluster in Mpc
@@ -192,8 +195,14 @@ class Cluster(AstroObject)
         cluster_zs = np.random.normal(0, 0.005, self.n) + self.z # generates array of cluster galaxy redshift
 
         cluster_members = np.zeros(self.n)
+
+        #Galaxy Types
+        gal_types = np.array(["elliptical", "spiral", "irregular"])
+        cl_gal_types = np.random.choice(gal_types, self.n, p=np.array([0.7,0.2,0.1]))
+
         for i in range(self.n):
-            cluster_members[i]= Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i], cluster_ms[i], sed = "elliptical")
+            cluster_members[i]= Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i], cluster_ms[i], sed = cl_gal_types[i])
+        
         return cluster_members
             
 
