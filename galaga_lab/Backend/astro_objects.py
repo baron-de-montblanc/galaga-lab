@@ -212,12 +212,12 @@ class Galaxy(AstroObject):
         self.agn   = agn_lum # AGN activity
         self.type  = type    # Galaxy type
         self.size  = size    # Angular diameter in arcmin
-        self.notes = notes   # string that describes the object
+        self.name   = name
+        self.notes = self.describe()   # string that describes the object
 
         #setting colors
         self.color  = self.estimate_color()
         self.mag    = self.estimate_mag()
-        self.name   = f"{self.name}: {self.describe()}" if self.name else self.describe()
     
     def get_sed_template(self):
         return SED_TEMPLATES.get(self.sed, SED_TEMPLATES[self.type])
@@ -335,7 +335,7 @@ class Galaxy(AstroObject):
 Cluster class
 '''    
 class Cluster(AstroObject):
-    def __init__(self, ra, dec, z, q, n, r, exposure_time=1, bcg_scale=1.5):
+    def __init__(self, ra, dec, z, q, n, r, name, exposure_time=1, bcg_scale=1.5):
         name = cluster_designation(ra, dec)
         super().__init__(ra, dec, z, name=name, exposure_time=exposure_time)
         self.q = q # squash factor of cluster from y-axis
@@ -419,10 +419,10 @@ class Cluster(AstroObject):
         cluster_members = np.array([], dtype=Galaxy)
         for i in range(self.n - 1):
             gal = Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i],
-                        name=f"{self.name} member {i+1}",
+                        name=f"{cl_gal_types[i].capitalize()} gallaxy",
                         size=member_size, mass=cluster_ms[i], sed=cl_gal_types[i],
                         exposure_time=self.exposure_time)
-            gal.name += " " + sat_sentence(self.name, self.bcg_name)
+            gal.notes += " " + sat_sentence(self.name, self.bcg_name)
             cluster_members = np.append(cluster_members, gal)
 
         cluster_members = np.insert(cluster_members, 0, bcg)

@@ -44,7 +44,7 @@ def generate_field(ra_center=180.0, dec_center=0.0, width=4.0, height=4.0,
     sizes = angular_sizes_from_z(zs, rng)
 
     for i in range(n_gals): 
-        g = Galaxy(ras[i], decs[i], zs[i], name=f"gen_gal_{i}", 
+        g = Galaxy(ras[i], decs[i], zs[i], name=f"{types[i].capitalize()} gallaxy", 
                    size=sizes[i], sed=types[i], mass=masses[i],
                    exposure_time = exposure_time)
         field = np.append(field, g)
