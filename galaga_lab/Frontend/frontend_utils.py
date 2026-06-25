@@ -48,12 +48,12 @@ def add_object(fig, galaxy, xs, ys, grid, cs, usename=True):
     fig.add_trace(go.Scatter(
         x             = [px[0]],
         y             = [px[1]],
-        mode          = "markers+text" if galaxy.name else "markers",
+        mode          = "markers+text",
         marker        = dict(opacity=0),
-        text          = [galaxy.name if usename else ""],
+        text          = galaxy.name if usename else "",
         textposition  = "top center",
         textfont      = dict(color="white", size=10),
-        name          = galaxy.name or f"RA={galaxy.ra} Dec={galaxy.dec}",
+        name          = galaxy.name,
         hovertemplate = (
             f"RA: {ra_str}<br>"
             f"Dec: {dec_str}<extra></extra>"
@@ -94,13 +94,13 @@ def add_catalog_objects(fig, catalog_path):
                 mass  = float(obj["mass_msun"]),
                 q     = float(obj["q"]),
                 type  = obj["type"],
-                size  = float(obj["size_arcmin"]),
-                notes = obj["notes"]
+                size  = float(obj["size_arcmin"])/10,
+                notes = obj["notes"],
+                exposure_time=5,
             )
 
         xs, ys, grid, cs = galaxy.prepare_figure_data()
-
-        fig = add_object(fig, galaxy, xs, ys, grid, cs)
+        fig = add_object(fig, galaxy, xs, ys, grid, cs, usename=True)
 
     return fig
 
@@ -226,8 +226,3 @@ def init_graph(catalog_path, random_field=False):
         fig = add_catalog_objects(fig, catalog_path=catalog_path)
 
     return fig
-
-
-if __name__ == "__main__":
-
-    add_random_field(0)
