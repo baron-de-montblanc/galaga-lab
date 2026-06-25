@@ -94,7 +94,7 @@ def cluster_designation(ra, dec):
     return f"Cluster J{ra:.1f}{sign}{abs(dec):.1f}"
 
 def sat_sentence(cluster_name, bcg_name): 
-    (f"It is a member of {cluster_name}, gravitationally bound into a massive cluster "
+    return (f"It is a member of {cluster_name}, gravitationally bound into a massive cluster "
             f"and orbiting the cluster's brightest central galaxy, {bcg_name}.")
 
 def bcg_sentence(cluster_name):
@@ -335,8 +335,9 @@ class Galaxy(AstroObject):
 Cluster class
 '''    
 class Cluster(AstroObject):
-    def __init__ (self, ra, dec, z, q, n, r, exposure_time=1, bcg_scale=1.5):
-        super().__init__(ra, dec, z, exposure_time)
+    def __init__(self, ra, dec, z, q, n, r, exposure_time=1, bcg_scale=1.5):
+        name = cluster_designation(ra, dec)
+        super().__init__(ra, dec, z, name=name, exposure_time=exposure_time)
         self.q = q # squash factor of cluster from y-axis
         self.ra = ra #Right Ascention, equatorial positon in sky
         self.dec = dec #Declination, angular distance from the equator
@@ -345,7 +346,6 @@ class Cluster(AstroObject):
         self.r = r #Radius of the cluster
         self.cluster_size = 0
         self.bcg_scale = bcg_scale
-        self.name = cluster_designation(ra, dec)
         self.bcg_name = f"{self.name} BCG"
         self.members = self.generate_members() # initializes the cluster with its members
 
@@ -410,23 +410,22 @@ class Cluster(AstroObject):
 
         member_size = 5 * cluster_size / 4
 
-        # BCG: massive central elliptical pinned at the cluster center
+        # BCG
         bcg = Galaxy(self.ra, self.dec, self.z, name=self.bcg_name,
-                     size=member_size * self.bcg_scale, type="elliptical", sed="elliptical",
-                     mass=5e12)
+                    size=member_size * self.bcg_scale, type="elliptical", sed="elliptical",
+                    mass=5e12, exposure_time=self.exposure_time)
         bcg.name += " " + bcg_sentence(self.name)
 
-        for i in range(self.n - 1):       # n-1 satellites; BCG fills the last slot
+        cluster_members = np.array([], dtype=Galaxy)
+        for i in range(self.n - 1):
             gal = Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i],
-                         name=f"{self.name} member {i+1}",
-                         size=member_size, mass=cluster_ms[i], sed=cl_gal_types[i])
+                        name=f"{self.name} member {i+1}",
+                        size=member_size, mass=cluster_ms[i], sed=cl_gal_types[i],
+                        exposure_time=self.exposure_time)
             gal.name += " " + sat_sentence(self.name, self.bcg_name)
             cluster_members = np.append(cluster_members, gal)
-        
+
         cluster_members = np.insert(cluster_members, 0, bcg)
-
-        return cluster_members
-
         return cluster_members
     
     def visualize_cluster(self):
