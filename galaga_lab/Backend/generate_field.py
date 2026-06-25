@@ -58,7 +58,7 @@ def generate_field(ra_center=180.0, dec_center=0.0, width=4.0, height=4.0,
     for i in range(n_clusters):
         c = Cluster(ra=cl_ras[i], dec=cl_decs[i], z=rng.uniform(0.1, 0.6), 
                     q=rng.uniform(0.5, 1.0), n=int(rng.integers(15, 30)),
-                    r=rng.uniform(0.8, 2.0), name=f"gen_cl_{i}", exposure_time=exposure_time)
+                    r=rng.uniform(0.8, 2.0), name=f"gen_cl_{i}", exposure_time=exposure_time, seed = seed)
         field = np.append(field, c)
     
     return field

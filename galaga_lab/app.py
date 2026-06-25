@@ -58,7 +58,7 @@ app.layout = dbc.Container([
 
     dbc.Row([
         dbc.Col([
-            dcc.Slider(min=0, max=20, marks=None,
+            dcc.Slider(min=0, max=100, marks=None,
                 value=10,
                 id='exposure-slider',
                 updatemode='mouseup',

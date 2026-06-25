@@ -290,7 +290,7 @@ class Galaxy(AstroObject):
         return self.mag
 
 
-    def prepare_figure_data(self, display_scale=4.0):
+    def prepare_figure_data(self, display_scale=0.1):
         '''
         possible: incorporate ang diameter distance instead of div by 5
         '''
@@ -335,7 +335,7 @@ class Galaxy(AstroObject):
 Cluster class
 '''    
 class Cluster(AstroObject):
-    def __init__(self, ra, dec, z, q, n, r, name, exposure_time=1, bcg_scale=1.5):
+    def __init__(self, ra, dec, z, q, n, r, name, seed=None, exposure_time=1, bcg_scale=1.5):
         name = cluster_designation(ra, dec)
         super().__init__(ra, dec, z, name=name, exposure_time=exposure_time)
         self.q = q # squash factor of cluster from y-axis
@@ -347,6 +347,7 @@ class Cluster(AstroObject):
         self.cluster_size = 0
         self.bcg_scale = bcg_scale
         self.bcg_name = f"{self.name} BCG"
+        self.seed = seed
         self.members = self.generate_members() # initializes the cluster with its members
 
     def generate_members(self):
@@ -354,29 +355,32 @@ class Cluster(AstroObject):
         four major arrrays: galaxy types, list of random masses for individual points, 
         ra and dec of all points
         '''
+        if self.seed:
+            rng = np.random.default_rng(self.seed)
+
         #Galaxy RAs and Decs
         r_Mpc = self.r # radius of cluster in Mpc
         dA_Mpc = cosmo.angular_diameter_distance(self.z).value # distance from observer to cluster in Mpc
         cluster_size = np.degrees(r_Mpc/dA_Mpc) * 50 # gets angular size of cluster in degrees (from rads) and scales up
         self.cluster_size = cluster_size #saving this for later
 
-        dx = np.random.normal(0, cluster_size, self.n) # returns array of random positions along x axis (RA)
-        dy = self.q * np.random.normal(0, cluster_size, self.n) # returns array of random positions along y axis (dec), with a boundary defined by q
+        dx = rng.normal(0, cluster_size, self.n) # returns array of random positions along x axis (RA)
+        dy = self.q * rng.normal(0, cluster_size, self.n) # returns array of random positions along y axis (dec), with a boundary defined by q
         cluster_ras  = (self.ra + dx) % 360.0                 # RA wraps around the sky
         cluster_decs = np.clip(self.dec + dy, -90.0, 90.0)    # Dec capped at the poles
-        # orient_angle = np.random.uniform(0, np.pi)
+        # orient_angle = rng.uniform(0, np.pi)
         
         #Galaxy masses
-        cluster_ms = np.power(10, np.random.uniform(9, 11, self.n)) # generates array of standard masses for cluster galaxies
+        cluster_ms = np.power(10, rng.uniform(9, 11, self.n)) # generates array of standard masses for cluster galaxies
 
         #Galaxy redshifts
-        cluster_zs = np.random.normal(0, 0.005, self.n) + self.z # generates array of cluster galaxy redshift
+        cluster_zs = rng.normal(0, 0.005, self.n) + self.z # generates array of cluster galaxy redshift
 
         #cluster_members = np.zeros(self.n)
 
         #Galaxy Types
         gal_types = np.array(["elliptical", "spiral", "irregular"])
-        cl_gal_types = np.random.choice(gal_types, self.n, p=np.array([0.7,0.2,0.1]))
+        cl_gal_types = rng.choice(gal_types, self.n, p=np.array([0.7,0.2,0.1]))
 
         # fix by appending instead of initializing
         '''
