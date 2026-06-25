@@ -109,7 +109,7 @@ def add_random_field(fig):
     Add random galaxy/cluster field instead of calatog objects
     """
 
-    field = generate_field(ra_center=180.0, dec_center=0.0, width=180.0, height=90.0,
+    field = generate_field(ra_center=180.0, dec_center=0.0, width=360.0, height=180.0,
                    n_gals=200, n_clusters=5, seed=None, exposure_time=5)
     
     for object in field:
