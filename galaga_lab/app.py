@@ -24,7 +24,7 @@ CATALOG_PATH = "./catalog.yml"
 server = Flask(__name__)
 server.secret_key = os.urandom(24)
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.VAPOR], server=server)
+app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY], server=server)
 
 
 app.layout = dbc.Container([
