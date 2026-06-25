@@ -170,7 +170,7 @@ class AstroObject:
 
         exposure_time = max(exposure_time, 1e-3)   # make slider min > 0
 
-        floor = 0.12
+        floor = 0.30
         ceiling = 1.5 #was 1.0, 2.0 a bit too bright
         DEPTH_GAIN = 2.0 #for how "sensitive" the slider is/an object is to exposure time; 1.25 is realistic but unresponsive
 
@@ -290,11 +290,11 @@ class Galaxy(AstroObject):
         return self.mag
 
 
-    def prepare_figure_data(self):
+    def prepare_figure_data(self, display_scale=4.0):
         '''
         possible: incorporate ang diameter distance instead of div by 5
         '''
-        sky_width_deg = self.size  # scale actual object size to size on the plot
+        sky_width_deg = self.size * display_scale  # scale actual object size to size on the plot
         
         wcs = make_wcs()
 
@@ -315,7 +315,7 @@ class Galaxy(AstroObject):
         xr = dx * np.cos(th) + dy * np.sin(th)
         yr = -dx * np.sin(th) + dy * np.cos(th)
 
-        size = pix_width / 3.0
+        size = pix_width / 2.0
         r2 = (xr / size) ** 2 + (yr / (size * self.q)) ** 2
 
         grid = self.peak_brightness() * np.exp(-0.5 * r2)
