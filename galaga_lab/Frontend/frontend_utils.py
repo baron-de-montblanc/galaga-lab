@@ -46,20 +46,19 @@ def add_object(fig, galaxy, xs, ys, grid, cs, usename=True):
     ))
 
     fig.add_trace(go.Scatter(
-        x             = [px[0]],
-        y             = [px[1]],
-        mode          = "markers+text",
-        marker        = dict(opacity=0),
-        text          = galaxy.name if usename else "",
-        textposition  = "top center",
-        textfont      = dict(color="white", size=10),
-        name          = galaxy.name,
-        hovertemplate = (
-            f"RA: {ra_str}<br>"
-            f"Dec: {dec_str}<extra></extra>"
-        ),
-        customdata = [[galaxy.name, galaxy.notes]],
+        x=[px[0]], y=[px[1]], mode="markers",
+        marker=dict(size=6, color="rgba(0,0,0,0)"),
+        name=galaxy.name,
+        hovertemplate=f"RA: {ra_str}<br>Dec: {dec_str}<extra></extra>",
+        customdata=[[galaxy.name, galaxy.notes]],
     ))
+    
+    if usename:
+        fig.add_annotation(
+            x=px[0], y=px[1], text=galaxy.name,
+            yshift=10, showarrow=False,
+            font=dict(color="white", size=10),
+        )
 
     fig.update_layout(
         hoverlabel=dict(

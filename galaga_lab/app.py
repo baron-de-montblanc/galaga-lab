@@ -6,13 +6,12 @@ from dash import (
     Output,
     Input,
     no_update,
+    ctx,
 )
 
 import dash_bootstrap_components as dbc
 import os
-
 from flask import Flask
-
 import Frontend.frontend_utils as frontu
 
 
@@ -48,12 +47,12 @@ app.layout = dbc.Container([
 
     dbc.Row([
         dbc.Col([
-            dbc.Button([
-                html.Span("Random Field", style={"display": "block", "font-size": "16px"}),
-                html.Span("ON", style={"display": "block", "font-size": "12px", "margin-top": "4px"}, id="on-off-switch"),
-            ], id="toggle-button", style={"text-align": "center", "flex":"1"}, outline=False, color="primary", n_clicks=0),
-        ], width='auto'),
-    ]),
+            dbc.ButtonGroup([
+                dbc.Button("Random Field", id="btn-random-field", color="primary", outline=False, n_clicks=0),
+                dbc.Button("Catalog", id="btn-catalog", color="primary", outline=True, n_clicks=0),
+            ], id="mode-toggle"),
+        ], width="auto"),
+    ], justify="center"),
 
     dbc.Modal([
         dbc.ModalHeader(
@@ -101,22 +100,23 @@ def on_galaxy_click(clickData):
 
 
 @callback(
-        Output("toggle-button", "outline"),
-        Output("on-off-switch", "children"),
-        Output("main-graph", "figure", allow_duplicate=True),
-        Input("toggle-button", "n_clicks"),
-        prevent_initial_call=True
+    Output("btn-random-field", "outline"),
+    Output("btn-catalog", "outline"),
+    Output("main-graph", "figure", allow_duplicate=True),
+    Input("btn-random-field", "n_clicks"),
+    Input("btn-catalog", "n_clicks"),
+    prevent_initial_call=True
 )
-def toggle_flags(nclicks):
+def toggle_view(rf_clicks, cat_clicks):
 
-    random_field_on = nclicks % 2 == 0
+    random_field_on = ctx.triggered_id == "btn-random-field"
 
     # update graph
     fig = frontu.init_graph(catalog_path=CATALOG_PATH, random_field=random_field_on)
 
     return (
-        not random_field_on,
-        "ON" if random_field_on else "OFF",
+        not random_field_on,   # btn-random-field: filled when active
+        random_field_on,       # btn-catalog: filled when active
         fig,
     )
 
