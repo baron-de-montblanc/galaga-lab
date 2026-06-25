@@ -362,8 +362,8 @@ class Cluster(AstroObject):
 
         dx = np.random.normal(0, cluster_size, self.n) # returns array of random positions along x axis (RA)
         dy = self.q * np.random.normal(0, cluster_size, self.n) # returns array of random positions along y axis (dec), with a boundary defined by q
-        cluster_ras = self.ra + dx # random list of individual galaxies' RAs in cluster 
-        cluster_decs = self.dec + dy # random list of individual galaxies' decs in cluster 
+        cluster_ras  = (self.ra + dx) % 360.0                 # RA wraps around the sky
+        cluster_decs = np.clip(self.dec + dy, -90.0, 90.0)    # Dec capped at the poles
         # orient_angle = np.random.uniform(0, np.pi)
         
         #Galaxy masses

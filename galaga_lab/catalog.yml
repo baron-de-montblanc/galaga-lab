@@ -107,3 +107,88 @@ objects:
       Nearest radio galaxy to Earth and one of the brightest radio sources in the sky.
       Features a dramatic dust lane bisecting its core, remnant of a past merger
       with a spiral galaxy. Powers a relativistic jet extending over a million light-years.
+
+  - name: Whirlpool Galaxy
+    aliases:
+      - M51
+      - NGC 5194
+    type: spiral
+    ra:  "13:29:52.700"
+    dec: "+47:11:43.00"
+    distance_mly: 23.0
+    redshift: 0.001544
+    magnitude:
+      apparent_v: 8.4
+      absolute_v: -21.6
+    size_arcmin: 11.2
+    mass_msun: 1.6e11
+    q: 0.62
+    constellation: Canes Venatici
+    notes: >
+      Grand-design spiral seen face-on, the first galaxy ever recognized as a
+      spiral. Its prominent two-armed structure is being driven by an ongoing
+      interaction with the smaller companion NGC 5195.
+
+  - name: Sombrero Galaxy
+    aliases:
+      - M104
+      - NGC 4594
+    type: lenticular
+    ra:  "12:39:59.400"
+    dec: "-11:37:23.00"
+    distance_mly: 31.1
+    redshift: 0.003416
+    magnitude:
+      apparent_v: 8.0
+      absolute_v: -21.8
+    size_arcmin: 8.7
+    mass_msun: 8.0e11
+    q: 0.40
+    constellation: Virgo
+    notes: >
+      Nearly edge-on galaxy with an unusually large central bulge and a striking
+      dark dust lane that gives it a hat-like silhouette. Hosts a roughly
+      one-billion-solar-mass central black hole and ~2000 globular clusters.
+
+  - name: Cigar Galaxy
+    aliases:
+      - M82
+      - NGC 3034
+    type: starburst
+    ra:  "09:55:52.200"
+    dec: "+69:40:47.00"
+    distance_mly: 11.5
+    redshift: 0.000677
+    magnitude:
+      apparent_v: 8.41
+      absolute_v: -19.6
+    size_arcmin: 11.2
+    mass_msun: 5.0e10
+    q: 0.38
+    constellation: Ursa Major
+    notes: >
+      Archetypal edge-on starburst galaxy, forming stars about ten times faster
+      than the Milky Way. The intense activity was triggered by a gravitational
+      encounter with its neighbor M81.
+
+  - name: Large Magellanic Cloud
+    aliases:
+      - LMC
+      - PGC 17223
+    type: irregular
+    ra:  "05:23:34.500"
+    dec: "-69:45:22.00"
+    distance_mly: 0.163
+    redshift: 0.000874
+    magnitude:
+      apparent_v: 0.9
+      absolute_v: -18.1
+    size_arcmin: 645.0
+    mass_msun: 2.7e10
+    q: 0.85
+    constellation: Dorado
+    notes: >
+      Largest and brightest satellite of the Milky Way and the most prominent
+      irregular galaxy in the sky. Linked to the SMC by the Magellanic Stream
+      and home to the Tarantula Nebula, the most active star-forming region in
+      the Local Group.
