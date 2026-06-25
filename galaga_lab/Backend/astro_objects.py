@@ -251,7 +251,7 @@ class Cluster(AstroObject):
         dy = self.q * np.random.normal(0, cluster_size, self.n) # returns array of random positions along y axis (dec), with a boundary defined by q
         cluster_ras = self.ra + dx # random list of individual galaxies' RAs in cluster 
         cluster_decs = self.dec + dy # random list of individual galaxies' decs in cluster 
-        orient_angle = np.random.uniform(0, np.pi)
+        # orient_angle = np.random.uniform(0, np.pi)
         
         #Galaxy masses
         cluster_ms = np.power(10, np.random.uniform(9, 11, self.n)) # generates array of standard masses for cluster galaxies

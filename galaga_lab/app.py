@@ -5,24 +5,13 @@ from dash import (
     callback,
     Output,
     Input,
-    State,
     no_update,
-    callback_context,
-    ALL,
 )
 
-import dash
-import math
-import numpy as np
-import plotly.graph_objects as go
-import plotly.colors as colors
 import dash_bootstrap_components as dbc
-import json
-import re
-import uuid
 import os
 
-from flask import session, Flask
+from flask import Flask
 
 import Frontend.frontend_utils as frontu
 
@@ -56,6 +45,15 @@ app.layout = dbc.Container([
             width=12, className="mb-0"
         ),
     ], className="mt-0", justify="center", align="center"),
+
+    dbc.Row([
+        dbc.Col([
+            dbc.Button([
+                html.Span("Random Field", style={"display": "block", "font-size": "16px"}),
+                html.Span("ON", style={"display": "block", "font-size": "12px", "margin-top": "4px"}, id="on-off-switch"),
+            ], id="toggle-button", style={"text-align": "center", "flex":"1"}, outline=False, color="primary", n_clicks=0),
+        ], width='auto'),
+    ]),
 
     dbc.Modal([
         dbc.ModalHeader(
@@ -100,6 +98,27 @@ def on_galaxy_click(clickData):
 
     name, notes = point["customdata"]
     return True, name, notes
+
+
+@callback(
+        Output("toggle-button", "outline"),
+        Output("on-off-switch", "children"),
+        Output("main-graph", "figure", allow_duplicate=True),
+        Input("toggle-button", "n_clicks"),
+        prevent_initial_call=True
+)
+def toggle_flags(nclicks):
+
+    random_field_on = nclicks % 2 == 0
+
+    # update graph
+    fig = frontu.init_graph(catalog_path=CATALOG_PATH, random_field=random_field_on)
+
+    return (
+        not random_field_on,
+        "ON" if random_field_on else "OFF",
+        fig,
+    )
 
 
 if __name__ == "__main__":
