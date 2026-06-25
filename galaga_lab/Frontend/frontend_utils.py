@@ -93,7 +93,7 @@ def add_catalog_objects(fig, catalog_path):
                 mass  = float(obj["mass_msun"]),
                 q     = float(obj["q"]),
                 type  = obj["type"],
-                size  = float(obj["size_arcmin"])/10,
+                size  = float(obj["size_arcmin"])/5,
                 notes = obj["notes"],
                 exposure_time=5,
             )
