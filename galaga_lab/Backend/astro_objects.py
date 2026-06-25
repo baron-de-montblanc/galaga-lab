@@ -122,7 +122,7 @@ class AstroObject:
         return fig
 
 class Galaxy(AstroObject): 
-    def __init__(self, ra, dec, z, name, 
+    def __init__(self, ra, dec, z, name, exposure_time,
             size    = 7, 
             type    = "spiral", 
             q       = 1,
@@ -130,9 +130,9 @@ class Galaxy(AstroObject):
             lensed  = False, 
             sed     = 'None', 
             agn_lum = 0.0,
-            notes   = ""
+            notes   = "",
             ):
-        super().__init__(ra, dec, z, name)
+        super().__init__(ra, dec, z, name, exposure_time)
         self.q     = q       # axis ratio
         self.angle = 0       # eventually add random axis-tilt for display
         self.mass  = mass    # solar masses
@@ -183,7 +183,7 @@ class Galaxy(AstroObject):
         '''
         possible: incorporate ang diameter distance instead of div by 5
         '''
-        sky_width_deg = self.size / 5  # scale actual object size to size on the plot
+        sky_width_deg = self.size  # scale actual object size to size on the plot
         
         wcs = make_wcs()
 
@@ -244,7 +244,7 @@ class Cluster(AstroObject):
         #Galaxy RAs and Decs
         r_Mpc = self.r # radius of cluster in Mpc
         dA_Mpc = cosmo.angular_diameter_distance(self.z).value # distance from observer to cluster in Mpc
-        cluster_size = np.degrees(r_Mpc/dA_Mpc) # gets angular size of cluster in degrees (from rads)
+        cluster_size = np.degrees(r_Mpc/dA_Mpc) * 50 # gets angular size of cluster in degrees (from rads) and scales up
         self.cluster_size = cluster_size #saving this for later
 
         dx = np.random.normal(0, cluster_size, self.n) # returns array of random positions along x axis (RA)
@@ -277,17 +277,19 @@ class Cluster(AstroObject):
         cluster_members = np.array([], dtype=Galaxy)
 
         # adjust size for jade's code
-        member_size = cluster_size / 4
+        member_size = cluster_size / 5
 
         for i in range(self.n):
             gal = Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i],
-                name=f"member_{i}", size=member_size, mass=cluster_ms[i], sed=cl_gal_types[i])
+                name=f"member_{i}", size=member_size, mass=cluster_ms[i], sed=cl_gal_types[i], exposure_time=self.exposure_time)
             cluster_members = np.append(cluster_members, gal)
 
         # add BCG
         bcg_name = f"BCG of {self.name}"
         bcg_size = member_size * self.bcg_scale #before doing this it gave a cool DM halo visualization
-        bcg = Galaxy(self.ra, self.dec, self.z, q=0.7, mass=1e12, sed="elliptical", name=bcg_name, size=bcg_size)
+        bcg = Galaxy(self.ra, self.dec, self.z, q=0.7, mass=1e12, sed="elliptical",
+                      name=bcg_name, 
+                      size=bcg_size, exposure_time=self.exposure_time)
         bcg.angle = np.random.uniform(0, 180)
         cluster_members = np.insert(cluster_members, 0, bcg)
 

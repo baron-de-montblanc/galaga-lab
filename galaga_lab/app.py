@@ -24,7 +24,7 @@ import os
 
 from flask import session, Flask
 
-import galaga_lab.Frontend.frontend_utils as frontu
+import Frontend.frontend_utils as frontu
 
 
 # =========== Global variables ==============
@@ -80,7 +80,7 @@ app.layout = dbc.Container([
     Input("init-interval", "n_intervals"),
 )
 def initialize_graph(n):
-    return frontu.init_graph(catalog_path=CATALOG_PATH)
+    return frontu.init_graph(catalog_path=CATALOG_PATH, random_field=True)
 
 
 @callback(
