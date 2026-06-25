@@ -27,10 +27,80 @@ while spiral and irregular galaxies are often bluer, indicating ongoing star for
 
 Just kinda picked at random with minor amounts of logic
 '''
+STARFORMING = {"spiral", "irregular", "starburst"}
 
 SED_TEMPLATES = {"elliptical": (0.80, 3.0), "lenticular": (0.72, 2.5), "spiral": (0.55, 1.8),
                  "irregular": (0.42, 1.2), "starburst":  (0.30, 0.8)}
 
+GAL_TRIVIA =   {   "elliptical":    [
+                                        "Ellliptical galaxies store all the retired stars. All of them are old and red, with too little gas left to make new ones.",
+                                        "An elliptical galaxy like this likely grew this big by swalloring up smaller galaxies over billions of years in events called mergers."
+                                    ], 
+                    "lenticular":   [
+                                        "Lenticular galaxies have a disk like a spiral, but are like elliptical galaxies in that they have little star-forming gas left.",
+                                        "Lenticular galaxies are like a spiral galaxies that just relaxed and chilled out."
+                                    ], 
+                    "spiral":       [
+                                        "The \"arms\" in the spiral shapes of these galaxies are stellar nurseries: Bright regions where new stars are constantly being born, emitting blue light.",
+                                        "Our own Milky Way is a spiral galaxy like this one, so we're constantly getting new stellar siblings!"
+                                    ],
+                    "irregular":    [
+                                        "Irregular galaxies are often chaotic in shape, due to collisions or gravitational tugs with neighbors.",
+                                        "Most are small and have a ton of star-forming gas, but lack the structure of spiral galaxies."
+                                    ], 
+                    "starburst":    [
+                                        "Starburst galaxies form stars faster than other star-forming galaxies, hence the name!",
+                                        "This galaxy has likely just merged with another, giving it a ton of new gas to make stars with."
+                                    ]
+                }
+
+# name helper functions
+def mass_phrase(mass): 
+    if mass >= 1e12: 
+        return f"{mass/1e12:.0f} trillion"
+    if mass >= 1e9:  
+        return f"{mass/1e9:.0f} billion"
+    return f"{mass/1e6:.0f} million"
+
+def distance_phrase(d_mpc): 
+    mly = d_mpc * 3.262 
+    if mly < 1000: 
+        return f"{mly:,.0f} million light-years"
+    return f"{mly/1000:.1f} billion light-years"
+
+def visibility(mag): 
+    if mag < 20: 
+        return "easy"
+    if mag < 23: 
+        return "moderate"
+    return "hard"
+
+def redshift_note(z):
+    if z < 0.1:  
+        return "It's one of our cosmic neighbors, relatively close by."
+    if z < 0.3:  
+        return "Its light traveled a good chunk of cosmic history to reach us, being slightly stretched to redder light in a process called redshifting."
+    if z < 0.7:  
+        return "We see it as it was billions of years ago, a window into the younger universe, stretched by space itself expanding into redder light."
+    if z < 1.5:  
+        return "Cosmic expansion has noticeably stretched its light toward the red, and we're seeing it when the universe was much younger."
+    return "Its light has been stretched dramatically by the expansion of the universe, carrying an image of the early universe."
+
+def cluster_designation(ra, dec):
+    if dec >= 0:
+        sign = "+"  
+    else: 
+        sign = "-"
+    return f"Cluster J{ra:.1f}{sign}{abs(dec):.1f}"
+
+def sat_sentence(cluster_name, bcg_name): 
+    (f"It is a member of {cluster_name}, gravitationally bound into a massive cluster "
+            f"and orbiting the cluster's brightest central galaxy, {bcg_name}.")
+
+def bcg_sentence(cluster_name):
+    return (f"It is the Brightest Central Galaxy of {cluster_name}, the giant elliptical at the "
+            f"cluster's heart. BCGs grow enormous over billions of years by merging with infalling "
+            f"galaxies, making them among the oldest and most massive galaxies known.")
 
 # Shared helper function
 def make_wcs():
@@ -122,7 +192,7 @@ class AstroObject:
         return fig
 
 class Galaxy(AstroObject): 
-    def __init__(self, ra, dec, z, name, exposure_time,
+    def __init__(self, ra, dec, z, name, exposure_time=1.0,
             size    = 7, 
             type    = "spiral", 
             q       = 1,
@@ -137,6 +207,7 @@ class Galaxy(AstroObject):
         self.angle = 0       # eventually add random axis-tilt for display
         self.mass  = mass    # solar masses
         #self.lensed = lensed 
+        self.exposure_time = exposure_time
         self.sed   = sed     # for stellar population type
         self.agn   = agn_lum # AGN activity
         self.type  = type    # Galaxy type
@@ -144,11 +215,51 @@ class Galaxy(AstroObject):
         self.notes = notes   # string that describes the object
 
         #setting colors
-        self.color = self.estimate_color()
-        self.mag   = self.estimate_mag()
+        self.color  = self.estimate_color()
+        self.mag    = self.estimate_mag()
+        self.name   = f"{self.name}: {self.describe()}" if self.name else self.describe()
     
     def get_sed_template(self):
         return SED_TEMPLATES.get(self.sed, SED_TEMPLATES[self.type])
+    
+    def effective_type(self):
+        return self.sed if self.sed in SED_TEMPLATES else self.type #this is from messy code I don't feel like fixing yet
+    
+    def describe(self):
+        """
+        Layman, educational descriptor built from this galaxy's own physical properties. 
+        Returns a string to be concat'd onto name.
+        """
+        etype = self.effective_type()
+        star_forming = etype in STARFORMING
+
+        lookback = cosmo.lookback_time(self.z).to_value("Gyr")
+        d_com = cosmo.comoving_distance(self.z).to_value("Mpc")
+        wl = ("bluer, shorter-wavelength light from hot, young stars" if star_forming
+              else "redder, longer-wavelength light from old, cool stars")
+
+        base = (f"This is a {etype} galaxy of about {mass_phrase(self.mass)} solar masses, "
+                f"glowing mostly in {wl}. It sits at redshift z = {self.z:.2f}, about "
+                f"{distance_phrase(d_com)} away, so its light left it roughly "
+                f"{lookback:.1f} billion years ago. At magnitude {self.mag:.1f} it would be "
+                f"{visibility(self.mag)} to spot.")
+
+        tidbits = [("It's actively forming new stars." if star_forming
+                   else "It has mostly stopped forming stars ('red and dead').")]
+        
+        if self.agn > 0:
+            tidbits.append("It hosts an active galactic nucleus: a supermassive black hole "
+                           "blazing as it feeds on surrounding gas.")
+            
+        tidbits.append(redshift_note(self.z))
+
+        pool = GAL_TRIVIA.get(etype, [])
+
+        if pool:
+            seed = int(round(self.z, 4) * 1e6 + self.mass) % (2**32)   # deterministic per object
+            tidbits.append(np.random.default_rng(seed).choice(pool))
+
+        return base + " " + " ".join(tidbits)
 
     def estimate_color(self):
         #pull template
@@ -224,7 +335,7 @@ class Galaxy(AstroObject):
 Cluster class
 '''    
 class Cluster(AstroObject):
-    def __init__ (self, ra, dec, z, name, q, n, r, exposure_time, bcg_scale=1.5):
+    def __init__ (self, ra, dec, z, name, q, n, r, exposure_time=1, bcg_scale=1.5):
         super().__init__(ra, dec, z, name, exposure_time)
         self.q = q # squash factor of cluster from y-axis
         self.ra = ra #Right Ascention, equatorial positon in sky
@@ -234,6 +345,8 @@ class Cluster(AstroObject):
         self.r = r #Radius of the cluster
         self.cluster_size = 0
         self.bcg_scale = bcg_scale
+        self.name = cluster_designation(ra, dec)
+        self.bcg_name = f"{self.name} BCG"
         self.members = self.generate_members() # initializes the cluster with its members
 
     def generate_members(self):
@@ -279,6 +392,7 @@ class Cluster(AstroObject):
         # adjust size for jade's code
         member_size = cluster_size / 5
 
+        '''
         for i in range(self.n):
             gal = Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i],
                 name=f"member_{i}", size=member_size, mass=cluster_ms[i], sed=cl_gal_types[i], exposure_time=self.exposure_time)
@@ -292,6 +406,26 @@ class Cluster(AstroObject):
                       size=bcg_size, exposure_time=self.exposure_time)
         bcg.angle = np.random.uniform(0, 180)
         cluster_members = np.insert(cluster_members, 0, bcg)
+        '''
+
+        member_size = 5 * cluster_size / 4
+
+        # BCG: massive central elliptical pinned at the cluster center
+        bcg = Galaxy(self.ra, self.dec, self.z, name=self.bcg_name,
+                     size=member_size * self.bcg_scale, type="elliptical", sed="elliptical",
+                     mass=5e12)
+        bcg.name += " " + bcg_sentence(self.name)
+
+        for i in range(self.n - 1):       # n-1 satellites; BCG fills the last slot
+            gal = Galaxy(cluster_ras[i], cluster_decs[i], cluster_zs[i],
+                         name=f"{self.name} member {i+1}",
+                         size=member_size, mass=cluster_ms[i], sed=cl_gal_types[i])
+            gal.name += " " + sat_sentence(self.name, self.bcg_name)
+            cluster_members = np.append(cluster_members, gal)
+        
+        cluster_members = np.insert(cluster_members, 0, bcg)
+
+        return cluster_members
 
         return cluster_members
     
