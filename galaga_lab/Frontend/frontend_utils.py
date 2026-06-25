@@ -7,12 +7,14 @@ import numpy as np
 import plotly.graph_objects as go
 import yaml
 from astropy import units as u
-from galaga_lab.Backend.astro_objects import Galaxy, make_wcs
+from Backend.astro_objects import Galaxy, make_wcs
+from Backend.generate_field import generate_field
 
-def add_object(fig, galaxy, xs, ys, grid, cs):
+
+def add_object(fig, galaxy, xs, ys, grid, cs, usename=True):
     """On-Sky Object Position Projection
 
-    Takes in go.Figre object from plotly, a Galaxy object from astro_objects.py and returns 
+    Takes in go.Figure object from plotly, a Galaxy object from astro_objects.py and returns 
     a modified graph object for displaying through DASH. 
 
     Args:
@@ -48,7 +50,7 @@ def add_object(fig, galaxy, xs, ys, grid, cs):
         y             = [px[1]],
         mode          = "markers+text" if galaxy.name else "markers",
         marker        = dict(opacity=0),
-        text          = [galaxy.name],
+        text          = [galaxy.name if usename else ""],
         textposition  = "top center",
         textfont      = dict(color="white", size=10),
         name          = galaxy.name or f"RA={galaxy.ra} Dec={galaxy.dec}",
@@ -103,7 +105,31 @@ def add_catalog_objects(fig, catalog_path):
     return fig
 
 
-def init_graph(catalog_path):
+def add_random_field(fig):
+    """
+    Add random galaxy/cluster field instead of calatog objects
+    """
+
+    field = generate_field(ra_center=180.0, dec_center=0.0, width=180.0, height=90.0, 
+                   n_gals=20, n_clusters=2, seed=None, exposure_time=5)
+    
+    for object in field:
+
+        if isinstance(object, Galaxy):
+            xs, ys, grid, cs = object.prepare_figure_data()
+            fig = add_object(fig, object, xs, ys, grid, cs, usename=False)
+
+        else:
+            cluster_members = object.generate_members()
+            for galaxy in cluster_members:
+                xs, ys, grid, cs = galaxy.prepare_figure_data()
+                fig = add_object(fig, galaxy, xs, ys, grid, cs, usename=False)
+    
+    return fig
+
+
+
+def init_graph(catalog_path, random_field=False):
     """
     Build and return the empty sky-chart figure using astropy
     """
@@ -193,7 +219,15 @@ def init_graph(catalog_path):
     )
 
 
-    # Now add catalog objects
-    fig = add_catalog_objects(fig, catalog_path=catalog_path)
+    # Now add objects
+    if random_field:
+        fig = add_random_field(fig)
+    else:
+        fig = add_catalog_objects(fig, catalog_path=catalog_path)
 
     return fig
+
+
+if __name__ == "__main__":
+
+    add_random_field(0)

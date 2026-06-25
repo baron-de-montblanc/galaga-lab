@@ -3,7 +3,7 @@ File for generating the field and functions associated with that
 '''
 import numpy as np
 import plotly.graph_objects as go
-from astro_objects import AstroObject, Galaxy, Cluster
+from .astro_objects import AstroObject, Galaxy, Cluster
 from astropy.cosmology import Planck18 as cosmo
 
 # setting arrays
@@ -11,17 +11,17 @@ gal_types = np.array(["elliptical", "lenticular", "spiral", "irregular", "starbu
 type_weights = np.array([0.20, 0.15, 0.35, 0.20, 0.10])
 
 # helper function
-def angular_sizes_from_z(zs, rng, z_ref=0.3, size_ref=0.7, scatter=0.25):
+def angular_sizes_from_z(zs, rng, z_ref=0.3, size_ref=3, scatter=0.25):
     zs = np.asarray(zs, dtype=float)
     dA = cosmo.angular_diameter_distance(zs).to_value("Mpc")
     dA_ref = cosmo.angular_diameter_distance(z_ref).to_value("Mpc")
 
     sizes  = size_ref * dA_ref / dA
     sizes *= rng.lognormal(mean=0.0, sigma=scatter, size=zs.shape)
-    return np.clip(sizes, 0.15, 1.3)
+    return sizes
 
 def generate_field(ra_center=180.0, dec_center=0.0, width=4.0, height=4.0, 
-                   n_gals=200, n_clusters=2, seed=None):
+                   n_gals=200, n_clusters=2, exposure_time=1, seed=None):
     rng = np.random.default_rng(seed)
 
     ra_low = ra_center - width/2
@@ -45,7 +45,8 @@ def generate_field(ra_center=180.0, dec_center=0.0, width=4.0, height=4.0,
 
     for i in range(n_gals): 
         g = Galaxy(ras[i], decs[i], zs[i], name=f"gen_gal_{i}", 
-                   size=sizes[i], sed=types[i], mass=masses[i])
+                   size=sizes[i], sed=types[i], mass=masses[i],
+                   exposure_time = exposure_time)
         field = np.append(field, g)
     
     # generate random positions
@@ -57,7 +58,7 @@ def generate_field(ra_center=180.0, dec_center=0.0, width=4.0, height=4.0,
     for i in range(n_clusters):
         c = Cluster(ra=cl_ras[i], dec=cl_decs[i], z=rng.uniform(0.1, 0.6), 
                     q=rng.uniform(0.5, 1.0), n=int(rng.integers(15, 30)),
-                    r=rng.uniform(0.8, 2.0), name=f"gen_cl_{i}", exposure_time=1.0)
+                    r=rng.uniform(0.8, 2.0), name=f"gen_cl_{i}", exposure_time=exposure_time)
         field = np.append(field, c)
     
     return field
