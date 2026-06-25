@@ -199,8 +199,8 @@ def init_graph(catalog_path, random_field=False):
 
     fig = go.Figure(data=traces)
     fig.update_layout(
-        paper_bgcolor="#1A0933",
-        plot_bgcolor="#1A0933",
+        paper_bgcolor="#111111",
+        plot_bgcolor="#111111",
         margin=dict(l=20, r=20, t=20, b=20),
         xaxis=dict(
             visible=False,

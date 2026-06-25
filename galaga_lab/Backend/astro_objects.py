@@ -319,7 +319,11 @@ class Galaxy(AstroObject):
         r2 = (xr / size) ** 2 + (yr / (size * self.q)) ** 2
 
         grid = self.peak_brightness() * np.exp(-0.5 * r2)
-        cs = [[0.0, "rgba(0,0,0,0)"], [1.0, self.get_hue()]]
+        hue = self.get_hue()
+        # parse rgb values from hue string for faint anchor
+        rgb = hue[4:-1].split(", ")
+        faint_hue = f"rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, 0.08)"
+        cs = [[0.0, "rgba(0,0,0,0)"], [0.15, faint_hue], [1.0, hue]]
 
         return xs, ys, grid, cs
 
