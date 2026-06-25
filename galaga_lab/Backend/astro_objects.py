@@ -290,7 +290,7 @@ class Galaxy(AstroObject):
         return self.mag
 
 
-    def prepare_figure_data(self, display_scale=4.0):
+    def prepare_figure_data(self, display_scale=2.0):
         '''
         possible: incorporate ang diameter distance instead of div by 5
         '''
