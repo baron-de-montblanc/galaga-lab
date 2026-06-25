@@ -364,6 +364,8 @@ class Cluster(AstroObject):
         '''
         if self.seed:
             rng = np.random.default_rng(self.seed)
+        else: 
+            rng = np.random.default_rng(seed=42)
 
         #Galaxy RAs and Decs
         r_Mpc = self.r # radius of cluster in Mpc
