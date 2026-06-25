@@ -110,7 +110,7 @@ def add_random_field(fig, exposure_time, seed):
     """
 
     field = generate_field(ra_center=180.0, dec_center=0.0, width=360.0, height=180.0, 
-                           n_gals=200, n_clusters=5, seed=None, exposure_time=5)
+                           n_gals=200, n_clusters=5, seed=seed, exposure_time=exposure_time)
     
     for object in field:
 
