@@ -38,7 +38,7 @@ def generate_field(ra_center=180.0, dec_center=0.0, width=4.0, height=4.0,
     # field making
     field = np.array([], dtype=AstroObject)
 
-    zs = rng.gamma(shape=2.0, scale=0.25, size=n_gals)
+    zs = np.maximum(rng.gamma(shape=2.0, scale=0.25, size=n_gals), 0.05)
     types = rng.choice(gal_types, size=n_gals, p=type_weights) 
     masses = np.power(10, rng.uniform(7, 11, n_gals))
     sizes = angular_sizes_from_z(zs, rng)

@@ -339,7 +339,7 @@ class Galaxy(AstroObject):
 Cluster class
 '''    
 class Cluster(AstroObject):
-    def __init__(self, ra, dec, z, q, n, r, name, exposure_time=1, bcg_scale=1.5):
+    def __init__(self, ra, dec, z, q, n, r, exposure_time=1, bcg_scale=1.5):
         name = cluster_designation(ra, dec)
         super().__init__(ra, dec, z, name=name, exposure_time=exposure_time)
         self.q = q # squash factor of cluster from y-axis
