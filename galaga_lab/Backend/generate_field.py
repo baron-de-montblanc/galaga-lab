@@ -26,14 +26,14 @@ def generate_field(ra_center=180.0, dec_center=0.0, width=4.0, height=4.0,
 
     ra_low = ra_center - width/2
     ra_high = ra_center + width/2
-    dec_low = dec_center - width/2
-    dec_high = dec_center + width/2
+    dec_low = dec_center - height/2
+    dec_high = dec_center + height/2
 
     # generate random positions
     ras = rng.uniform(ra_low, ra_high, n_gals)
     sin_1 = np.sin(np.radians(dec_low))
     sin_2 = np.sin(np.radians(dec_high))
-    decs = np.degrees(np.arcsin(rng.uniform(sin_1, sin_2, n_gals)))
+    decs = np.degrees(np.arcsin(np.clip(rng.uniform(sin_1, sin_2, n_gals), -1.0, 1.0)))
 
     # field making
     field = np.array([], dtype=AstroObject)
@@ -53,7 +53,7 @@ def generate_field(ra_center=180.0, dec_center=0.0, width=4.0, height=4.0,
     cl_ras = rng.uniform(ra_low, ra_high, n_clusters)
     sin_1 = np.sin(np.radians(dec_low))
     sin_2 = np.sin(np.radians(dec_high))
-    cl_decs = np.degrees(np.arcsin(rng.uniform(sin_1, sin_2, n_clusters))) 
+    cl_decs = np.degrees(np.arcsin(np.clip(rng.uniform(sin_1, sin_2, n_clusters), -1.0, 1.0)))
 
     for i in range(n_clusters):
         c = Cluster(ra=cl_ras[i], dec=cl_decs[i], z=rng.uniform(0.1, 0.6),

@@ -301,8 +301,11 @@ class Galaxy(AstroObject):
         # Find pixel position of galaxy center
         cx, cy = wcs.all_world2pix([[self.ra, self.dec]], 0)[0]
 
-        edge_ra  = wcs.all_world2pix([[self.ra + sky_width_deg, self.dec]], 0)[0][0]
-        pix_width = abs(edge_ra - cx)
+        # Use small offset toward projection center (RA=180) to avoid RA wrap at 0/360
+        delta = -0.1 if self.ra > 180 else 0.1
+        edge_x = wcs.all_world2pix([[self.ra + delta, self.dec]], 0)[0][0]
+        pix_per_deg = abs(edge_x - cx) / abs(delta)
+        pix_width = min(pix_per_deg * sky_width_deg, 15.0)  # cap so no object floods the frame
 
         n_pix = int(np.clip(pix_width * 20, 20, 200))
         xs = np.linspace(cx - pix_width, cx + pix_width, n_pix)
