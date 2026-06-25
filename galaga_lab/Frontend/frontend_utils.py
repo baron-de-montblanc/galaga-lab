@@ -75,7 +75,7 @@ def add_object(fig, galaxy, xs, ys, grid, cs, usename=True):
     return fig
 
 
-def add_catalog_objects(fig, catalog_path):
+def add_catalog_objects(fig, catalog_path, exposure_time):
     """
     Loads in the catalog.yaml file and adds all objects to the graph. Calls add_object()
     """
@@ -86,16 +86,16 @@ def add_catalog_objects(fig, catalog_path):
 
         coord  = SkyCoord(ra=obj["ra"], dec=obj["dec"], unit=(u.hourangle, u.deg))
         galaxy = Galaxy(
-                ra    = coord.ra.to(u.deg).value,
-                dec   = coord.dec.to(u.deg).value, 
-                z     = float(obj["redshift"]), 
-                name  = obj["name"],
-                mass  = float(obj["mass_msun"]),
-                q     = float(obj["q"]),
-                type  = obj["type"],
-                size  = float(obj["size_arcmin"])/10,
-                notes = obj["notes"],
-                exposure_time=5,
+                ra            = coord.ra.to(u.deg).value,
+                dec           = coord.dec.to(u.deg).value, 
+                z             = float(obj["redshift"]), 
+                name          = obj["name"],
+                mass          = float(obj["mass_msun"]),
+                q             = float(obj["q"]),
+                type          = obj["type"],
+                size          = float(obj["size_arcmin"])/10,
+                notes         = obj["notes"],
+                exposure_time = exposure_time,
             )
 
         xs, ys, grid, cs = galaxy.prepare_figure_data()
@@ -104,13 +104,13 @@ def add_catalog_objects(fig, catalog_path):
     return fig
 
 
-def add_random_field(fig):
+def add_random_field(fig, exposure_time, seed):
     """
     Add random galaxy/cluster field instead of calatog objects
     """
 
     field = generate_field(ra_center=180.0, dec_center=0.0, width=180.0, height=90.0, 
-                   n_gals=20, n_clusters=2, seed=None, exposure_time=5)
+                   n_gals=20, n_clusters=2, seed = seed, exposure_time = exposure_time)
     
     for object in field:
 
@@ -128,7 +128,7 @@ def add_random_field(fig):
 
 
 
-def init_graph(catalog_path, random_field=False):
+def init_graph(catalog_path, exposure_time, random_field=False, seed=None):
     """
     Build and return the empty sky-chart figure using astropy
     """
@@ -220,8 +220,8 @@ def init_graph(catalog_path, random_field=False):
 
     # Now add objects
     if random_field:
-        fig = add_random_field(fig)
+        fig = add_random_field(fig, exposure_time=exposure_time, seed=seed)
     else:
-        fig = add_catalog_objects(fig, catalog_path=catalog_path)
+        fig = add_catalog_objects(fig, catalog_path=catalog_path, exposure_time=exposure_time)
 
     return fig
