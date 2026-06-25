@@ -200,7 +200,7 @@ class Galaxy(AstroObject):
             lensed  = False, 
             sed     = 'None', 
             agn_lum = 0.0,
-            notes   = "",
+            notes   = None,
             ):
         super().__init__(ra, dec, z, name, exposure_time)
         self.q     = q       # axis ratio
@@ -213,7 +213,7 @@ class Galaxy(AstroObject):
         self.type  = type    # Galaxy type
         self.size  = size    # Angular diameter in arcmin
         self.name   = name
-        self.notes = self.describe()   # string that describes the object
+        self.notes = notes if notes else self.describe()   # string that describes the object
 
         #setting colors
         self.color  = self.estimate_color()
