@@ -11,7 +11,7 @@ gal_types = np.array(["elliptical", "lenticular", "spiral", "irregular", "starbu
 type_weights = np.array([0.20, 0.15, 0.35, 0.20, 0.10])
 
 # helper function
-def angular_sizes_from_z(zs, rng, z_ref=0.3, size_ref=4, scatter=0.25):
+def angular_sizes_from_z(zs, rng, z_ref=0.3, size_ref=1.5, scatter=0.25):
     zs = np.asarray(zs, dtype=float)
     dA = cosmo.angular_diameter_distance(zs).to_value("Mpc")
     dA_ref = cosmo.angular_diameter_distance(z_ref).to_value("Mpc")

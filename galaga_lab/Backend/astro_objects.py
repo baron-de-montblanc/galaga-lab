@@ -143,12 +143,12 @@ class AstroObject:
         Interpolate between a blue and a red rgb sequence
         Makes a direct blue-to-red scale
         '''
-        c    = np.clip((self.color - 0.3) / 0.6, 0.0, 1.0) #"clips" color to 0, 1
-        blue = np.array([150, 180, 255])
-        red  = np.array([255, 140, 110])
+        c    = np.clip((self.color - 0.3) / 1.2, 0.0, 1.0) #"clips" color to 0, 1; wider range accounts for redshift shift
+        blue = np.array([70, 130, 255])
+        red  = np.array([255, 70, 50])
 
         r, g, b = (blue + c*(red-blue)).astype(int)
-        return f"rgb({r}, {g}, {b})" #formatted this way for plotly 
+        return f"rgb({r}, {g}, {b})" #formatted this way for plotly
     
     def peak_brightness(self, faint=25.0, bright=15.0, exposure_time=None):
         '''
@@ -290,12 +290,12 @@ class Galaxy(AstroObject):
         return self.mag
 
 
-    def prepare_figure_data(self, display_scale=2.0):
+    def prepare_figure_data(self, display_scale=0.8):
         '''
         possible: incorporate ang diameter distance instead of div by 5
         '''
         sky_width_deg = self.size * display_scale  # scale actual object size to size on the plot
-        
+
         wcs = make_wcs()
 
         # Find pixel position of galaxy center
@@ -304,7 +304,7 @@ class Galaxy(AstroObject):
         edge_ra  = wcs.all_world2pix([[self.ra + sky_width_deg, self.dec]], 0)[0][0]
         pix_width = abs(edge_ra - cx)
 
-        n_pix = 200
+        n_pix = int(np.clip(pix_width * 20, 20, 200))
         xs = np.linspace(cx - pix_width, cx + pix_width, n_pix)
         ys = np.linspace(cy - pix_width, cy + pix_width, n_pix)
         X, Y = np.meshgrid(xs, ys)
@@ -408,7 +408,7 @@ class Cluster(AstroObject):
         cluster_members = np.insert(cluster_members, 0, bcg)
         '''
 
-        member_size = 5 * cluster_size / 4
+        member_size = 1.0  # fixed size independent of cluster spread
 
         # BCG
         bcg = Galaxy(self.ra, self.dec, self.z, name=self.bcg_name,
