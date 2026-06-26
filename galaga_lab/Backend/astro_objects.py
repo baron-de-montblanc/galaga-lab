@@ -55,27 +55,65 @@ GAL_TRIVIA =   {   "elliptical":    [
                 }
 
 # name helper functions
-def mass_phrase(mass): 
+def mass_phrase(mass):
+    """Format a mass as a human-readable phrase, e.g. "3 trillion".
+
+    Args:
+        mass (float): Mass in solar masses.
+
+    Returns:
+        str: Mass rounded to a whole number with a magnitude word
+            ("million", "billion", or "trillion").
+    """
     if mass >= 1e12: 
         return f"{mass/1e12:.0f} trillion"
     if mass >= 1e9:  
         return f"{mass/1e9:.0f} billion"
     return f"{mass/1e6:.0f} million"
 
+
 def distance_phrase(d_mpc): 
+    """Format a distance as a human-readable phrase, e.g. "1.4 billion light-years".
+
+    Args:
+        d_mpc (float): Distance in megaparsecs.
+
+    Returns:
+        str: Distance converted to light-years with a magnitude word
+            ("million" below 1000 Mly, otherwise "billion").
+    """
     mly = d_mpc * 3.262 
     if mly < 1000: 
         return f"{mly:,.0f} million light-years"
     return f"{mly/1000:.1f} billion light-years"
 
+
 def visibility(mag): 
+    """Classify how hard an object is to observe from its magnitude.
+
+    Args:
+        mag (float): Apparent magnitude (brighter objects have lower values).
+
+    Returns:
+        str: "easy" (mag < 20), "moderate" (20 <= mag < 23), or "hard" (mag >= 23).
+    """
     if mag < 20: 
         return "easy"
     if mag < 23: 
         return "moderate"
     return "hard"
 
+
 def redshift_note(z):
+    """Return a plain-language note describing an object's redshift.
+
+    Args:
+        z (float): Redshift.
+
+    Returns:
+        str: A descriptive sentence whose tone scales with z, from a nearby
+            neighbor (z < 0.1) up through the early universe (z >= 1.5).
+    """
     if z < 0.1:  
         return "It's one of our cosmic neighbors, relatively close by."
     if z < 0.3:  
@@ -86,36 +124,89 @@ def redshift_note(z):
         return "Cosmic expansion has noticeably stretched its light toward the red, and we're seeing it when the universe was much younger."
     return "Its light has been stretched dramatically by the expansion of the universe, carrying an image of the early universe."
 
+
 def cluster_designation(ra, dec):
+    """Build a cluster's catalog designation from its coordinates.
+
+    Args:
+        ra (float): Right ascension in degrees.
+        dec (float): Declination in degrees.
+
+    Returns:
+        str: A name like "Cluster J180.5+12.3", with a signed declination.
+    """
     if dec >= 0:
         sign = "+"  
     else: 
         sign = "-"
     return f"Cluster J{ra:.1f}{sign}{abs(dec):.1f}"
 
+
 def sat_sentence(cluster_name, bcg_name): 
+    """Build a sentence describing a satellite galaxy's cluster membership.
+
+    Args:
+        cluster_name (str): Name of the host cluster.
+        bcg_name (str): Name of the brightest central galaxy.
+
+    Returns:
+        str: A sentence stating the galaxy belongs to the cluster and orbits
+            its brightest central galaxy.
+    """
     return (f"It is a member of {cluster_name}, gravitationally bound into a massive cluster "
             f"and orbiting the cluster's brightest central galaxy, {bcg_name}.")
 
+
 def bcg_sentence(cluster_name):
+    """Build a sentence describing a brightest central galaxy (BCG).
+
+    Args:
+        cluster_name (str): Name of the cluster the galaxy anchors.
+
+    Returns:
+        str: A sentence identifying the galaxy as the cluster's BCG, with a
+            note on how BCGs grow by mergers.
+    """
     return (f"It is the Brightest Central Galaxy of {cluster_name}, the giant elliptical at the "
             f"cluster's heart. BCGs grow enormous over billions of years by merging with infalling "
             f"galaxies, making them among the oldest and most massive galaxies known.")
 
+
 # Shared helper function
 def make_wcs():
-        wcs = WCS(naxis=2)
-        wcs.wcs.crpix = [0, 0]
-        wcs.wcs.cdelt = [1.0, 1.0]
-        wcs.wcs.crval = [180, 0]          # center of projection
-        wcs.wcs.ctype = ["RA---AIT", "DEC--AIT"]
-        return wcs
+    """Build the Aitoff WCS used to project sky coordinates to chart pixels.
+
+    Sets up a 2D Aitoff (RA---AIT/DEC--AIT) projection centered at RA=180deg,
+    Dec=0deg, with a 1deg-per-pixel scale and the reference pixel at the origin.
+
+    Returns:
+        astropy.wcs.WCS: The configured WCS, shared by the figure builders.
+    """
+    wcs = WCS(naxis=2)
+    wcs.wcs.crpix = [0, 0]
+    wcs.wcs.cdelt = [1.0, 1.0]
+    wcs.wcs.crval = [180, 0]          # center of projection
+    wcs.wcs.ctype = ["RA---AIT", "DEC--AIT"]
+    return wcs
 
 
 class AstroObject: 
     def __init__(self, ra, dec, z, name=None, exposure_time=1.0):
-        """
-        ra, dec in degrees
+        """Initialize an astronomical object at a sky position and redshift.
+
+        Args:
+            ra (float): Right ascension in degrees.
+            dec (float): Declination in degrees.
+            z (float): Redshift. Used to derive luminosity distance.
+            name (str, optional): Object name. Defaults to None.
+            exposure_time (float, optional): Exposure time used in later
+                brightness/visibility calculations. Defaults to 1.0.
+
+        Attributes:
+            coord (SkyCoord): Sky position built from ra/dec.
+            d (float): Luminosity distance in Mpc, from z via the cosmology.
+            color (float): Placeholder, set later. Initialized to 0.
+            mag (float): Placeholder magnitude, set later. Initialized to 0.
         """
         self.ra    = ra
         self.dec   = dec 
@@ -129,20 +220,22 @@ class AstroObject:
 
     ## some shared physics/cosmology/coloring/display stuff
     def distance_modulus(self): 
-        """
-        apparent/absolute with z
+        """Return the distance modulus (m − M) for this object's redshift.
+
+        Returns:
+            float: Distance modulus in magnitudes, from z via the cosmology.
         """
         return cosmo.distmod(self.z).value
     
     def get_hue(self): 
-        '''
-        Map color index (g-r) to an rgb string
-        blue (~0.3) -> red (~0.9)
+        """Map this object's color index (g-r) to a blue-red RGB string.
 
-        Normalize the color over the [0,1] range for easier coloring
-        Interpolate between a blue and a red rgb sequence
-        Makes a direct blue-to-red scale
-        '''
+        Normalizes the color index to [0, 1], then linearly interpolates between a
+        blue and a red, so blue is bluer/younger and red is redder/older.
+
+        Returns:
+            str: A Plotly-style color, e.g. "rgb(120, 100, 200)".
+        """
         c    = np.clip((self.color - 0.3) / 1.2, 0.0, 1.0) #"clips" color to 0, 1; wider range accounts for redshift shift
         blue = np.array([70, 130, 255])
         red  = np.array([255, 70, 50])
@@ -150,25 +243,25 @@ class AstroObject:
         r, g, b = (blue + c*(red-blue)).astype(int)
         return f"rgb({r}, {g}, {b})" #formatted this way for plotly
     
-    def peak_brightness(self, faint=25.0, bright=15.0, exposure_time=None):
-        '''
-        map magnitude to a peak brightness
-        range it [0.05, 1] to test...
-        Larger mag (fainter) = dimmer
-        Less than 15 mag is the "core" 
-        Greater than 25 (LSST depths) is 0.05, linear between (just for display)
-        '''
-        # easier integration to slider maybe?
-        if exposure_time is None:
-            exposure_time = self.exposure_time
-        
-        '''
-        Could just do 
-        for galaxy in the field: 
-            set self.exposure_time to current slider value
-        '''
+    def peak_brightness(self, faint=25.0, bright=15.0):
+        """Map this object's magnitude to a display brightness, scaled by exposure.
 
-        exposure_time = max(exposure_time, 1e-3)   # make slider min > 0
+        Computes a limiting magnitude from the exposure time, then linearly maps
+        this object's magnitude into a brightness value (fainter = dimmer), clipped
+        to a display range. Longer exposures push the limiting magnitude fainter, so
+        dim objects brighten.
+
+        Args:
+            faint (float): Magnitude mapping to the low end of brightness (survey
+                depth, e.g. LSST ~25). Defaults to 25.0.
+            bright (float): Magnitude mapping to the high end (the "core"). Defaults
+                to 15.0.
+
+        Returns:
+            float: Display brightness, clipped to [0.30, 1.5]. Not physical — tuned
+                for rendering.
+        """
+        exposure_time = max(self.exposure_time, 1e-3)   # make slider min > 0
 
         floor = 0.30
         ceiling = 1.5 #was 1.0, 2.0 a bit too bright
@@ -343,6 +436,26 @@ Cluster class
 '''    
 class Cluster(AstroObject):
     def __init__(self, ra, dec, z, q, n, r, seed=None, exposure_time=1, bcg_scale=1.5):
+        """Initialize a galaxy cluster and generate its member galaxies.
+
+        Args:
+            ra (float): Right ascension in degrees.
+            dec (float): Declination in degrees.
+            z (float): Redshift.
+            q (float): Squash factor along the y-axis (cluster ellipticity).
+            n (int): Number of member galaxies.
+            r (float): Cluster radius.
+            seed (int, optional): Seed for reproducible member generation.
+                Defaults to None.
+            exposure_time (float, optional): Exposure time forwarded to members.
+                Defaults to 1.
+            bcg_scale (float, optional): Size/brightness boost for the brightest
+                central galaxy. Defaults to 1.5.
+
+        Attributes:
+            bcg_name (str): Name of the brightest central galaxy.
+            members (list): Member galaxies, built by generate_members().
+        """
         name = cluster_designation(ra, dec)
         super().__init__(ra, dec, z, name=name, exposure_time=exposure_time)
         self.q = q # squash factor of cluster from y-axis
@@ -358,10 +471,18 @@ class Cluster(AstroObject):
         self.members = self.generate_members() # initializes the cluster with its members
 
     def generate_members(self):
-        '''
-        four major arrrays: galaxy types, list of random masses for individual points, 
-        ra and dec of all points
-        '''
+        """Generate the cluster's member galaxies, including a central BCG.
+
+        Draws ``n`` members from the cluster's seeded RNG: positions are scattered
+        around the cluster center with a Gaussian spread (squashed by ``q`` in Dec),
+        masses are drawn log-uniformly, redshifts are jittered around the cluster z,
+        and types are sampled (mostly elliptical). A brightest central galaxy is
+        built at the cluster center and inserted at index 0.
+
+        Returns:
+            np.ndarray: Array of Galaxy objects, with the BCG first followed by
+                ``n - 1`` satellites.
+        """
         if self.seed:
             rng = np.random.default_rng(self.seed)
         else: 
