@@ -7,8 +7,8 @@ import numpy as np
 import plotly.graph_objects as go
 import yaml
 from astropy import units as u
-from Backend.astro_objects import Galaxy, make_wcs
-from Backend.generate_field import generate_field
+from galaga_lab.Backend.astro_objects import Galaxy, make_wcs
+from galaga_lab.Backend.generate_field import generate_field
 
 
 def add_object(fig, galaxy, xs, ys, grid, cs, usename=True):
