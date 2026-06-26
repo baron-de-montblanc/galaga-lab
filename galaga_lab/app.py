@@ -13,7 +13,7 @@ from dash import (
 import dash_bootstrap_components as dbc
 import os
 from flask import Flask
-import Frontend.frontend_utils as frontu
+import galaga_lab.Frontend.frontend_utils as frontu
 import random
 
 
