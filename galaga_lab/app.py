@@ -44,6 +44,15 @@ app.layout = dbc.Container([
     ], className="my-2"),
 
     dbc.Row([
+
+        dbc.Col(
+            html.H3("(Ga)laxy and c(L)uster (A)stronomy (G)enerative (A)cademic Lab"),
+            width=12, className="text-center"
+        ),
+
+    ], className="my-2"),
+
+    dbc.Row([
         dbc.Col(
             dcc.Graph(id="main-graph", style={"width": "100%", "height": "70vh"}),
             width=12, className="mb-0"
