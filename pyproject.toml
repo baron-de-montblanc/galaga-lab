@@ -10,7 +10,7 @@ mypkg = "galaga_lab"
 
 [project]
 name = "galaga_lab"
-version = "0.0.2" 
+version = "0.0.3" 
 dependencies = [
 	"astropy", 
 	"numpy", 
