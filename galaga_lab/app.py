@@ -158,6 +158,8 @@ def update_exposure(exposure_time, rf_outline, seed):
     return frontu.init_graph(catalog_path=CATALOG_PATH, random_field=random_field_on,
                              exposure_time=exposure_time, seed=seed)
 
+def galaga_lab():
+    app.run(debug=False)
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
