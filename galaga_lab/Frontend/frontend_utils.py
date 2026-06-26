@@ -128,8 +128,25 @@ def add_catalog_objects(fig, catalog_path, exposure_time):
 
 
 def add_random_field(fig, exposure_time, seed):
-    """
-    Add random galaxy/cluster field instead of calatog objects
+    """Generate a random galaxy/cluster field and overlay it on an on-sky projection.
+
+    Builds a procedurally generated field of galaxies and clusters covering the
+    full sky and adds every galaxy to ``fig`` via :func:`add_object`. Cluster
+    members are unpacked and drawn individually. Object name labels are
+    suppressed, since the field is dense. Use in place of
+    :func:`add_catalog_objects` when you want a synthetic field rather than a
+    curated catalog.
+
+    Args:
+        fig (plotly.graph_objects.Figure): Figure to draw on. Mutated in place.
+        exposure_time (float): Exposure time applied to every galaxy, in the
+            units expected by ``Galaxy`` (e.g. seconds).
+        seed: Seed for the field generator, for reproducible fields. Passed
+            through to :func:`generate_field`.
+
+    Returns:
+        plotly.graph_objects.Figure: The same ``fig``, with the full field drawn
+        on it.
     """
 
     field = generate_field(ra_center=180.0, dec_center=0.0, width=360.0, height=180.0, 
@@ -151,8 +168,32 @@ def add_random_field(fig, exposure_time, seed):
 
 
 def init_graph(catalog_path, exposure_time, random_field=False, seed=None):
-    """
-    Build and return the empty sky-chart figure using astropy
+    """Build the base sky-chart figure and populate it with objects.
+
+    Constructs an Aitoff-style on-sky projection: draws the coordinate graticule
+    (declination parallels every 15° and RA meridians every hour, with labels),
+    an outer boundary ellipse, and a dark themed layout with a 1:1 aspect ratio.
+    Then overlays either a curated catalog or a procedurally generated random
+    field, depending on ``random_field``. Intended as the top-level figure
+    builder for a Dash app.
+
+    Args:
+        catalog_path (str or os.PathLike): Path to the YAML catalog passed to
+            :func:`add_catalog_objects`. Used only when ``random_field`` is
+            False, but always required by the signature — pass a placeholder (or
+            see note below) when generating a random field.
+        exposure_time (float): Exposure time applied to every galaxy, in the
+            units expected by ``Galaxy`` (e.g. seconds).
+        random_field (bool, optional): If True, populate the chart with a random
+            field via :func:`add_random_field` instead of reading the catalog.
+            Defaults to False.
+        seed (int or None, optional): Seed forwarded to :func:`add_random_field`
+            for reproducibility. Only used when ``random_field`` is True.
+            Defaults to None.
+
+    Returns:
+        plotly.graph_objects.Figure: A fully assembled figure with graticule,
+        boundary, and overlaid objects, ready to hand to Dash.
     """
     wcs        = make_wcs()
     n_pts      = 400
