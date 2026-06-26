@@ -18,11 +18,11 @@ import os
 from flask import Flask
 import galaga_lab.Frontend.frontend_utils as frontu
 import random
-
+from importlib.resources import files
 
 # =========== Global variables ==============
-
-CATALOG_PATH = "./catalog.yml"
+#CATALOG_PATH = "./catalog.yml"
+CATALOG_PATH = files("galaga_lab") / "catalog.yml"
 
 # ====== Initialize the webserver ============
 
