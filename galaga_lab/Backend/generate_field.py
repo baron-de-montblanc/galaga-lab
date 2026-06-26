@@ -42,11 +42,13 @@ def generate_field(ra_center=180.0, dec_center=0.0, width=4.0, height=4.0,
     types = rng.choice(gal_types, size=n_gals, p=type_weights) 
     masses = np.power(10, rng.uniform(7, 11, n_gals))
     sizes = angular_sizes_from_z(zs, rng)
+    qs = rng.uniform(0.3, 1.0, n_gals) 
 
     for i in range(n_gals): 
         g = Galaxy(ras[i], decs[i], zs[i], name=f"{types[i].capitalize()} gallaxy", 
                    size=sizes[i], sed=types[i], mass=masses[i],
-                   exposure_time = exposure_time)
+                   exposure_time = exposure_time, q=qs[i])
+        g.angle = rng.uniform(0, 180)
         field = np.append(field, g)
     
     # generate random positions
